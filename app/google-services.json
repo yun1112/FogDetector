@@ -1,0 +1,97 @@
+{
+  "project_info": {
+    "project_number": "1089177296881",
+    "project_id": "parkinson-project-2d31a",
+    "storage_bucket": "parkinson-project-2d31a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1089177296881:android:ccf5e0a13e346ba6486e50",
+        "android_client_info": {
+          "package_name": "com.harrysoft.androidbluetoothserial"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1089177296881-2oukj0htr8lqc3615qcgj664957b8rf9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDXp1S42o9KJzXA74_xT4fMTSR6WDT7xOE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1089177296881-2oukj0htr8lqc3615qcgj664957b8rf9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1089177296881:android:210cc388d63307cb486e50",
+        "android_client_info": {
+          "package_name": "com.leadstep"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1089177296881-2oukj0htr8lqc3615qcgj664957b8rf9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDXp1S42o9KJzXA74_xT4fMTSR6WDT7xOE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1089177296881-2oukj0htr8lqc3615qcgj664957b8rf9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1089177296881:android:f66b9fccbdfcf424486e50",
+        "android_client_info": {
+          "package_name": "com.leadstepapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1089177296881-2oukj0htr8lqc3615qcgj664957b8rf9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDXp1S42o9KJzXA74_xT4fMTSR6WDT7xOE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1089177296881-2oukj0htr8lqc3615qcgj664957b8rf9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

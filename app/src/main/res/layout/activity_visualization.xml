@@ -1,0 +1,430 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity"
+    android:orientation="vertical"
+    android:background="@drawable/bg">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="30dp"
+        android:paddingLeft="25dp"
+        android:paddingRight="25dp">
+
+        <TextView
+            android:id="@+id/t1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Welcome Back,"
+            android:textColor="#fff"
+            android:textSize="20dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/t1"
+            android:fontFamily="sans-serif-black"
+            android:letterSpacing="0.04"
+            android:text="JAKARIA"
+            android:textColor="#fff"
+            android:textSize="28dp" />
+
+        <ImageView
+            android:layout_width="95dp"
+            android:layout_height="150dp"
+            android:layout_alignParentRight="true"
+            android:scaleX="-1"
+            android:src="@drawable/parkinson" />
+
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="310dp">
+
+            <Button
+                android:id="@+id/startLeft_button"
+                android:layout_width="120dp"
+                android:layout_height="40dp"
+                android:background="@drawable/rounded_corner"
+                android:text="Start Left"
+                android:textColor="@color/white"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.237"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="1.0" />
+
+            <Button
+                android:id="@+id/startRight_button"
+                android:layout_width="120dp"
+                android:layout_height="40dp"
+                android:background="@drawable/rounded_corner"
+                android:text="Start Right"
+                android:textColor="@color/white"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.81"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="1.0" />
+
+            <ToggleButton
+                android:id="@+id/connectLeft_button"
+                android:layout_width="120dp"
+                android:layout_height="40dp"
+                android:background="@drawable/rounded_corner"
+                android:text="ToggleButton"
+                android:textColor="@color/white"
+                android:textOff="Connect Left"
+                android:textOn="Disconnect Left"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.237"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.811" />
+
+            <ToggleButton
+                android:id="@+id/connectRight_button"
+                android:layout_width="120dp"
+                android:layout_height="40dp"
+                android:background="@drawable/rounded_corner"
+                android:text="ToggleButton"
+                android:textColor="@color/white"
+                android:textOff="Connect Right"
+                android:textOn="Disconnect Right"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.81"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.811" />
+
+            <ca.hss.heatmaplib.HeatMap
+                android:id="@+id/heatmapRight"
+                android:layout_width="60dp"
+                android:layout_height="180dp"
+                android:layout_alignParentLeft="true"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.76"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.133"
+                app:maxDrawingWidth="200dp"
+                app:maxOpacity="255"
+                app:minOpacity="0"
+                app:radius="200dp"
+                tools:ignore="MissingClass" />
+
+            <ImageView
+                android:id="@+id/imageView"
+                android:layout_width="150dp"
+                android:layout_height="200dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.199"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.04"
+                app:srcCompat="@drawable/shoepad_l" />
+
+            <ImageView
+                android:id="@+id/rightpad"
+                android:layout_width="150dp"
+                android:layout_height="200dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.854"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.04"
+                app:srcCompat="@drawable/shoepad" />
+
+            <ca.hss.heatmaplib.HeatMap
+                android:id="@+id/heatmapLeft"
+                android:layout_width="60dp"
+                android:layout_height="180dp"
+                android:layout_alignParentLeft="true"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.287"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.133"
+                app:maxDrawingWidth="200dp"
+                app:maxOpacity="255"
+                app:minOpacity="0"
+                app:radius="200dp"
+                tools:ignore="MissingClass" />
+
+            <!--            <ca.hss.heatmaplib.HeatMap-->
+<!--                android:id="@+id/heatmapRight"-->
+<!--                android:layout_width="60dp"-->
+<!--                android:layout_height="180dp"-->
+<!--                android:layout_alignParentLeft="true"-->
+<!--                app:layout_constraintBottom_toBottomOf="parent"-->
+<!--                app:layout_constraintEnd_toEndOf="parent"-->
+<!--                app:layout_constraintHorizontal_bias="0.715"-->
+<!--                app:layout_constraintStart_toStartOf="parent"-->
+<!--                app:layout_constraintTop_toTopOf="parent"-->
+<!--                app:layout_constraintVertical_bias="0.122"-->
+<!--                app:maxDrawingWidth="200dp"-->
+<!--                app:maxOpacity="255"-->
+<!--                app:minOpacity="0"-->
+<!--                app:radius="200dp"-->
+<!--                tools:ignore="MissingClass" />-->
+
+<!--            <ImageView-->
+<!--                android:id="@+id/imageView"-->
+<!--                android:layout_width="150dp"-->
+<!--                android:layout_height="200dp"-->
+<!--                app:layout_constraintBottom_toBottomOf="parent"-->
+<!--                app:layout_constraintEnd_toEndOf="parent"-->
+<!--                app:layout_constraintHorizontal_bias="0.176"-->
+<!--                app:layout_constraintStart_toStartOf="parent"-->
+<!--                app:layout_constraintTop_toTopOf="parent"-->
+<!--                app:layout_constraintVertical_bias="0.08"-->
+<!--                app:srcCompat="@drawable/shoepad_l" />-->
+
+<!--            <ImageView-->
+<!--                android:id="@+id/rightpad"-->
+<!--                android:layout_width="150dp"-->
+<!--                android:layout_height="200dp"-->
+<!--                app:layout_constraintBottom_toBottomOf="parent"-->
+<!--                app:layout_constraintEnd_toEndOf="parent"-->
+<!--                app:layout_constraintHorizontal_bias="0.793"-->
+<!--                app:layout_constraintStart_toStartOf="parent"-->
+<!--                app:layout_constraintTop_toTopOf="parent"-->
+<!--                app:layout_constraintVertical_bias="0.08"-->
+<!--                app:srcCompat="@drawable/shoepad" />-->
+
+<!--            <ca.hss.heatmaplib.HeatMap-->
+<!--                android:id="@+id/heatmapLeft"-->
+<!--                android:layout_width="60dp"-->
+<!--                android:layout_height="180dp"-->
+<!--                android:layout_alignParentLeft="true"-->
+<!--                app:layout_constraintBottom_toBottomOf="parent"-->
+<!--                app:layout_constraintEnd_toEndOf="parent"-->
+<!--                app:layout_constraintHorizontal_bias="0.264"-->
+<!--                app:layout_constraintStart_toStartOf="parent"-->
+<!--                app:layout_constraintTop_toTopOf="parent"-->
+<!--                app:layout_constraintVertical_bias="0.122"-->
+<!--                app:maxDrawingWidth="200dp"-->
+<!--                app:maxOpacity="255"-->
+<!--                app:minOpacity="0"-->
+<!--                app:radius="200dp"-->
+<!--                tools:ignore="MissingClass" />-->
+
+<!--            <ToggleButton-->
+<!--                android:id="@+id/connectInsole"-->
+<!--                android:layout_width="120dp"-->
+<!--                android:layout_height="30dp"-->
+<!--                android:background="@drawable/rounded_corner"-->
+<!--                android:text="ToggleButton"-->
+<!--                android:textColor="#ffffff"-->
+<!--                android:textOff="Scan Insole"-->
+<!--                android:textOn="Disconnect"-->
+<!--                app:layout_constraintBottom_toBottomOf="parent"-->
+<!--                app:layout_constraintEnd_toEndOf="parent"-->
+<!--                app:layout_constraintHorizontal_bias="0.158"-->
+<!--                app:layout_constraintStart_toStartOf="parent"-->
+<!--                app:layout_constraintTop_toTopOf="parent"-->
+<!--                app:layout_constraintVertical_bias="0.95" />-->
+
+<!--            <Button-->
+<!--                android:id="@+id/startInsole"-->
+<!--                android:layout_width="120dp"-->
+<!--                android:layout_height="30dp"-->
+<!--                android:layout_marginLeft="20dp"-->
+<!--                android:background="@drawable/rounded_corner"-->
+<!--                android:text="Start"-->
+<!--                android:textColor="#ffffff"-->
+<!--                app:layout_constraintBottom_toBottomOf="parent"-->
+<!--                app:layout_constraintEnd_toEndOf="parent"-->
+<!--                app:layout_constraintHorizontal_bias="0.814"-->
+<!--                app:layout_constraintStart_toStartOf="parent"-->
+<!--                app:layout_constraintTop_toTopOf="parent"-->
+<!--                app:layout_constraintVertical_bias="0.95" />-->
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingLeft="15dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Rhythm Cueing"
+            android:textSize="25dp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-black"
+            android:textColor="#516b9e"
+            android:letterSpacing="0.02"/>
+
+
+    </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <RelativeLayout
+            android:id="@+id/r1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/border"
+            android:padding="10dp">
+
+            <ImageView
+                android:id="@+id/i1"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/vibrate" />
+
+            <TextView
+                android:id="@+id/tt1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:layout_toRightOf="@+id/i1"
+                android:fontFamily="sans-serif-black"
+                android:letterSpacing="0.03"
+                android:text="Vibrator \n and Sound Cue"
+                android:textColor="#516b9e"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/btnScanVib"
+                android:layout_width="100dp"
+                android:layout_height="25dp"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:background="@drawable/rounded_corner"
+                android:text="Scan"
+                android:textColor="#ffffff"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.112"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.976" />
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/r2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/r1"
+            android:background="@drawable/border"
+            android:padding="10dp">
+
+            <ImageView
+                android:id="@+id/i3"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/laser" />
+
+            <TextView
+                android:id="@+id/tt3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="10dp"
+                android:layout_toRightOf="@+id/i3"
+                android:fontFamily="sans-serif-black"
+                android:letterSpacing="0.03"
+                android:text="Left Laser Cue"
+                android:textColor="#516b9e"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/btnScanL"
+                android:layout_width="100dp"
+                android:layout_height="25dp"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:background="@drawable/rounded_corner"
+                android:text="Scan"
+                android:textColor="#ffffff"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.112"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.976" />
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/r3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/r2"
+            android:background="@drawable/border"
+            android:padding="10dp">
+
+            <ImageView
+                android:id="@+id/i4"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:scaleX="-1"
+                android:src="@drawable/laser" />
+
+            <TextView
+                android:id="@+id/tt4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="10dp"
+                android:layout_toRightOf="@+id/i4"
+                android:fontFamily="sans-serif-black"
+                android:letterSpacing="0.03"
+                android:text="Right Laser Cue"
+                android:textColor="#516b9e"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/btnScanR"
+                android:layout_width="100dp"
+                android:layout_height="25dp"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:background="@drawable/rounded_corner"
+                android:text="Scan"
+                android:textColor="#ffffff"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.112"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.976" />
+
+        </RelativeLayout>
+
+
+
+
+    </RelativeLayout>
+</LinearLayout>
