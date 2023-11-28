@@ -1,11 +1,11 @@
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
 android {
-    compileSdkVersion 29
+    compileSdkVersion 31
     defaultConfig {
         applicationId "com.leadstepapp"
-        minSdkVersion 21
-        targetSdkVersion 29
+        minSdkVersion 26
+        targetSdkVersion 31
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -18,12 +18,13 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    aaptOptions {
-        noCompress "tflite"
-    }
     compileOptions {
         targetCompatibility 1.8
         sourceCompatibility 1.8
+    }
+    namespace 'com.leadstepapp'
+    androidResources {
+        noCompress 'tflite'
     }
 }
 
@@ -54,7 +55,13 @@ dependencies {
     testImplementation "androidx.arch.core:core-testing:2.1.0"
 
     // RxJava
-    implementation 'io.reactivex.rxjava2:rxjava:2.2.15'
+//    implementation 'io.reactivex.rxjava2:rxjava:2.2.15'
+//    implementation 'io.reactivex.rxjava2:rxandroid:2.0.2'
+
+    implementation 'com.github.harry1453:android-bluetooth-serial:v1.1'
+
+    // RxJava is also required.
+    implementation 'io.reactivex.rxjava2:rxjava:2.1.12'
     implementation 'io.reactivex.rxjava2:rxandroid:2.0.2'
 
     // Bluetooth library
@@ -66,10 +73,18 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
     //Retrofit
-    implementation 'com.squareup.okhttp3:okhttp:3.4.1'
+//    implementation 'com.squareup.okhttp3:okhttp:3.4.1'
 
     implementation 'org.apache.commons:commons-collections4:4.4'
     implementation 'org.tensorflow:tensorflow-lite:0.0.0-nightly'
     implementation 'org.tensorflow:tensorflow-lite-gpu:0.0.0-nightly'
+
+
+    // RxJava and RxAndroid
+//    implementation 'io.reactivex.rxjava2:rxjava:2.3.10'
+//    implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
+//import io.reactivex.Single
+    // OkHttp
+    implementation 'com.squareup.okhttp3:okhttp:4.9.1'
 
 }

@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
@@ -84,8 +85,11 @@ public class Visualization extends BlunoLibrary {
     private ToggleButton connectLeftBtn, connectRightBtn;
     //    private String L_insole_mac = "20:17:12:04:04:57";
 //    private String R_insole_mac = "20:17:12:04:19:55";
-    private String L_insole_mac = "20:19:06:20:08:07";
-    private String R_insole_mac = "20:19:06:20:06:72";
+//    private String L_insole_mac = "20:19:06:20:08:07";
+//    private String R_insole_mac = "20:19:06:20:06:72";
+
+    private String L_insole_mac = "20:19:06:20:08:97";
+    private String R_insole_mac = "20:17:12:04:19:37";
     private String start_bytes = "0 254 128";
     private String left_data, right_data, left_temp_bytes, right_temp_bytes;
     private String PATIENT_NAME, PATIENT_ID, DOCTOR_NAME, DOCTOR_ID;
@@ -249,6 +253,7 @@ public class Visualization extends BlunoLibrary {
         connectLeftBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+                Log.d(String.valueOf(isChecked), "isChecked: ");
                 if (isChecked) {
                     connectDevice(L_insole_mac);
                 } else {
@@ -265,6 +270,7 @@ public class Visualization extends BlunoLibrary {
             }
 
             private void connectDevice(String mac) {
+                Log.d(mac, "mac: ");
                 bluetoothManager.openSerialDevice(mac)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
@@ -346,6 +352,7 @@ public class Visualization extends BlunoLibrary {
 
             private void onError(Throwable error) {
                 // Handle the error
+                Log.d(TAG, "onError: ");
             }
 
         });
@@ -353,6 +360,9 @@ public class Visualization extends BlunoLibrary {
         connectRightBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+                Log.d(String.valueOf(is_R_insole_connected), "is_R_insole_connected: ");
+                Log.d(String.valueOf(isChecked), "isChecked: ");
+                Log.d(String.valueOf(R_insole_mac), "R_insole_mac: ");
 
                 if (isChecked) {
                     connectDevice(R_insole_mac);
@@ -371,11 +381,14 @@ public class Visualization extends BlunoLibrary {
                 }
             }
 
+//            @SuppressLint("CheckResult")
             private void connectDevice(String mac) {
-                bluetoothManager.openSerialDevice(mac)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(this::onConnected, this::onError);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    bluetoothManager.openSerialDevice(mac)
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(this::onConnected, this::onError);
+                }
             }
 
             @RequiresApi(api = Build.VERSION_CODES.O)
@@ -417,9 +430,12 @@ public class Visualization extends BlunoLibrary {
                             right_data_index++;
                         }
                     }
+                    Log.d(Arrays.toString(r_data_double_arr), "r_data_double_arr: ");
 
                     LList.add(Arrays.toString(l_data_double_arr).replace("]", ""));
                     RList.add(Arrays.toString(r_data_double_arr).replace("[", ""));
+                    Log.d(RList.toString(), "RList: ");
+
                     if (RList.size()== 1 && LList.size() == 1){
                         ListData.addAll(Collections.singleton(LList.get(0)));
                         ListData.addAll(Collections.singleton(RList.get(0)));
@@ -440,6 +456,8 @@ public class Visualization extends BlunoLibrary {
                             heatMapRight.addData(point);
                             heatMapRight.forceRefresh();
                         }
+                        Log.d(r_data_double_arr.toString(), "r_data_double_arr: ");
+
                         Date date = new Date();
 //                            rightDataDict.put(String.valueOf(formatter.format(date)), Arrays.toString(r_data_double_arr));
 //                        String list = Arrays.toString(customers.toArray()).replace("[", "").replace("]", "");
@@ -465,6 +483,8 @@ public class Visualization extends BlunoLibrary {
         startLeftBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Log.d(String.valueOf(is_L_insole_connected), "is_L_insole_connected: ");
+
                 if (is_L_insole_connected) {
                     if (is_L_insole_started) {
                         left_insole_device_interface.stopInsole();

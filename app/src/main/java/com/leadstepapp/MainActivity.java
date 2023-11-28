@@ -2,7 +2,11 @@ package com.leadstepapp;
 
 import static android.content.ContentValues.TAG;
 
+import android.Manifest;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -12,12 +16,15 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.core.app.ActivityCompat;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -32,7 +39,7 @@ public class MainActivity extends BlunoLibrary {
 	private SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss.SSS");
 	SimpleDateFormat sdf3 = new SimpleDateFormat("HH:mm:ss.SSS");
 
-	String LL = "", LR = "", dataTimeDelay="";
+	String LL = "", LR = "", dataTimeDelay = "";
 	Timer timer = new Timer(true);
 	int sequenceCount = 0;
 	int writeCount = 0;
@@ -42,7 +49,7 @@ public class MainActivity extends BlunoLibrary {
 	private Timer carousalTimerR;
 	private Timer carousalTimerV;
 	String data = "";
-	String timeDL = "", timeDR= "", timeDV= "";
+	String timeDL = "", timeDR = "", timeDV = "";
 
 	private int indexL = 0, indexR = 0, indexV = 0;
 
@@ -54,6 +61,7 @@ public class MainActivity extends BlunoLibrary {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+
 
 		request(1000, new OnPermissionsResult() {
 			@Override

@@ -3,6 +3,7 @@ package com.leadstepapp.bluetoothseriallibrary
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import io.reactivex.Single
+
 import java.nio.charset.Charset
 
 interface BluetoothManager : AutoCloseable {
