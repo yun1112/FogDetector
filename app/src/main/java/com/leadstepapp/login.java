@@ -12,20 +12,46 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.type.DateTime;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 
 public class login extends AppCompatActivity {
     EditText PatientN, PatientID, DoctorN, DoctorID, Email;
     Button StartBtn;
+    private DatabaseReference mDatabase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        // DB test
+        // Write a message to the database
+//        FirebaseDatabase database = FirebaseDatabase.getInstance();
+//        DatabaseReference myRef = database.getReference("message");
+//// ...
+//        myRef.setValue("Hello, World!");
+        // Get a reference to the database
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+
+        // Write data to the database
+        writeData();
+
+        // Read data from the database
+        readData();
 
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
@@ -72,5 +98,51 @@ public class login extends AppCompatActivity {
         });
 
 
+    }
+
+    private void writeData() {
+        // Create a new "users" child in the database
+        DatabaseReference usersRef = mDatabase.child("users"); // user name
+//        Double[] left = new Double[89];
+//        Double[] right = new Double[89];
+        ArrayList<Double> left = new ArrayList<>();
+        ArrayList<Double> right = new ArrayList<>();
+        left.add(0.1);
+        right.add(0.2);
+        // Add a new user with some data
+        User newUser = new User("User", left, right);
+        Log.d(String.valueOf(newUser.getLeft()), "newUser: ");
+        usersRef.child(usersRef.push().getKey()).setValue(newUser); // collected data(unique)
+    }
+
+    private void readData() {
+        // Read data from the "users" child in the database
+        DatabaseReference usersRef = mDatabase.child("users");
+
+        // Attach a listener to read the data
+        usersRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                // This method is called once with the initial value and whenever data at this location is updated
+                for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
+                    User user = new User();
+                    Log.d(userSnapshot.getKey(), "userSnapshot.getKey(): ");
+                    Log.d(String.valueOf(userSnapshot.child(userSnapshot.getKey())), "userSnapshot.child(): ");
+                    user.setName(userSnapshot.getKey());
+
+//                    User user = userSnapshot.child("user1").getValue(User.class);
+//                    Log.d(user.getName(), "user1: ");
+                    if (user != null) {
+                        Log.d("Firebase", "User: " + user.getName() );
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Failed to read value
+                Log.e("Firebase", "Failed to read value.", databaseError.toException());
+            }
+        });
     }
 }

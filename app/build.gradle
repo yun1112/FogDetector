@@ -1,11 +1,12 @@
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
+
 android {
-    compileSdkVersion 31
+    compileSdkVersion 33
     defaultConfig {
         applicationId "com.leadstepapp"
         minSdkVersion 26
-        targetSdkVersion 31
+        targetSdkVersion 33
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -68,7 +69,7 @@ dependencies {
     implementation project(path: ':BluetoothSerialLibrary')
 
     // Testing
-    testImplementation 'junit:junit:4.12'
+//    testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
@@ -76,8 +77,8 @@ dependencies {
 //    implementation 'com.squareup.okhttp3:okhttp:3.4.1'
 
     implementation 'org.apache.commons:commons-collections4:4.4'
-    implementation 'org.tensorflow:tensorflow-lite:0.0.0-nightly'
-    implementation 'org.tensorflow:tensorflow-lite-gpu:0.0.0-nightly'
+    implementation 'org.tensorflow:tensorflow-lite:2.14.0'
+    implementation 'org.tensorflow:tensorflow-lite-gpu:2.14.0'
 
 
     // RxJava and RxAndroid
@@ -86,5 +87,17 @@ dependencies {
 //import io.reactivex.Single
     // OkHttp
     implementation 'com.squareup.okhttp3:okhttp:4.9.1'
+    // Import the BoM for the Firebase platform
+    implementation platform('com.google.firebase:firebase-bom:32.6.0')
+    // Add the dependency for the Realtime Database library
+    // When using the BoM, you don't specify versions in Firebase library dependencies
+//    implementation 'com.google.firebase:firebase-analytics'
+//    implementation("com.google.firebase:firebase-database")
+//    implementation 'com.google.firebase:firebase-core:24.2.1'
+
+    implementation 'com.google.firebase:firebase-analytics:17.2.3'
+//    implementation 'com.google.firebase:firebase-core:24.2.1'
+    implementation 'com.google.firebase:firebase-database:20.3.0'
+
 
 }

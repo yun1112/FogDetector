@@ -1,12 +1,16 @@
 package com.leadstepapp;
 
+import android.Manifest;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
+
+import androidx.core.app.ActivityCompat;
 
 import java.util.ArrayList;
 
@@ -26,7 +30,7 @@ public class BLEDeviceAdapter extends BaseAdapter {
     public BLEDeviceAdapter(Context c) {
         super();
         mContext = c;
-        inflater = (LayoutInflater)mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         bluetoothDevices = new ArrayList<BluetoothDevice>();
 //        this.bluetoothDevices = (ArrayList<BluetoothDevice>)bluetoothDevices.clone();
 //        deviceNames = new ArrayList<String>();
@@ -75,10 +79,20 @@ public class BLEDeviceAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         View view = convertView;
 
-        view = inflater.inflate(R.layout.listitem_device,null);
+        view = inflater.inflate(R.layout.listitem_device, null);
         TextView deviceName = (TextView) view.findViewById(R.id.device_name);
         TextView deviceAddress = (TextView) view.findViewById(R.id.device_address);
 //        TextView deviceState = (TextView) view.findViewById(R.id.deviceState);
+        if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+//            return TODO;
+        }
         if (bluetoothDevices.get(position).getName() != null && bluetoothDevices.get(position).getName().length() > 0)
             deviceName.setText(bluetoothDevices.get(position).getName());
         else

@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity"
+    android:orientation="vertical"
+    android:background="@drawable/bg">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="30dp"
+        android:paddingLeft="25dp"
+        android:paddingRight="25dp">
+
+        <TextView
+            android:id="@+id/t1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Welcome Back,"
+            android:textColor="#fff"
+            android:textSize="20dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/t1"
+            android:fontFamily="sans-serif-black"
+            android:letterSpacing="0.04"
+            android:text="User"
+            android:textColor="#fff"
+            android:textSize="28dp" />
+
+        <ImageView
+            android:layout_width="95dp"
+            android:layout_height="150dp"
+            android:layout_alignParentRight="true"
+            android:scaleX="-1"
+            android:src="@drawable/parkinson" />
+
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="500dp">
+
+            <Button
+                android:id="@+id/startRight_button"
+                android:layout_width="300dp"
+                android:layout_height="40dp"
+                android:background="@drawable/rounded_corner"
+                android:text="Start"
+                android:textColor="@color/white"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.621"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.997" />
+
+            <ToggleButton
+                android:id="@+id/connectLeft_button"
+                android:layout_width="120dp"
+                android:layout_height="40dp"
+                android:background="@drawable/rounded_corner"
+                android:text="ToggleButton"
+                android:textColor="@color/white"
+                android:textOff="Connect Left"
+                android:textOn="Disconnect Left"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.237"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.811" />
+
+            <ToggleButton
+                android:id="@+id/connectRight_button"
+                android:layout_width="120dp"
+                android:layout_height="40dp"
+                android:background="@drawable/rounded_corner"
+                android:text="ToggleButton"
+                android:textColor="@color/white"
+                android:textOff="Connect Right"
+                android:textOn="Disconnect Right"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.81"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.811" />
+
+            <ca.hss.heatmaplib.HeatMap
+                android:id="@+id/heatmapRight"
+                android:layout_width="60dp"
+                android:layout_height="180dp"
+                android:layout_alignParentLeft="true"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.76"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.133"
+                app:maxDrawingWidth="200dp"
+                app:maxOpacity="255"
+                app:minOpacity="0"
+                app:radius="200dp"
+                tools:ignore="MissingClass" />
+
+            <ImageView
+                android:id="@+id/imageView"
+                android:layout_width="150dp"
+                android:layout_height="300dp"
+                android:layout_marginTop="30dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.199"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.04"
+                app:srcCompat="@drawable/shoepad_l" />
+
+            <ImageView
+                android:id="@+id/rightpad"
+                android:layout_width="150dp"
+                android:layout_height="300dp"
+                android:layout_marginTop="30dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.854"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.04"
+                app:srcCompat="@drawable/shoepad" />
+
+            <ca.hss.heatmaplib.HeatMap
+                android:id="@+id/heatmapLeft"
+                android:layout_width="60dp"
+                android:layout_height="180dp"
+                android:layout_alignParentLeft="true"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.287"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.133"
+                app:maxDrawingWidth="200dp"
+                app:maxOpacity="255"
+                app:minOpacity="0"
+                app:radius="200dp"
+                tools:ignore="MissingClass" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </LinearLayout>
+
+</LinearLayout>
