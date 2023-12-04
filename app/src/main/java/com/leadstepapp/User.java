@@ -4,7 +4,7 @@ import com.google.type.Date;
 import com.google.type.DateTime;
 
 import java.lang.reflect.Array;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.List;
 
 public class User {
@@ -12,8 +12,8 @@ public class User {
 //    private Double left[] = new Double[89];
 //    private Double right[] = new Double[89];
 
-    private ArrayList<Double> left;
-    private ArrayList<Double> right;
+    private List<Double> left;
+    private List<Double> right;
     private DateTime createAt;
     public User() {
         // Default constructor required for calls to DataSnapshot.getValue(User.class)
@@ -22,24 +22,24 @@ public class User {
     public User(String name) {
         this.name = name;
     }
-    public User(String name, ArrayList<Double> left, ArrayList<Double> right) {
+    public User(String name, List<Double> left, List<Double> right) {
         this.name = name;
-        this.left = (ArrayList<Double>) left.clone();
-        this.right = (ArrayList<Double>) right.clone();
+        this.left = left;
+        this.right = right;
 //        this.createAt = DateTime.getDefaultInstance();
     }
 
     public List<Double> getLeft() {
         return left;
     }
-    public void setLeft(ArrayList<Double> left) {
-        this.left = (ArrayList<Double>) left.clone();
+    public void setLeft(List<Double> left) {
+        this.left = left;
     }
     public List<Double> getRight() {
         return right;
     }
-    public void setRight(ArrayList<Double> right) {
-        this.right = (ArrayList<Double>) right.clone();
+    public void setRight(List<Double> right) {
+        this.right = right;
     }
 //    public User(String name, Double[] left, Double[] right, DateTime createAt) {
 //        this.name = name;

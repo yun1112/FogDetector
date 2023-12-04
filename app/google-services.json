@@ -1,14 +1,14 @@
 {
   "project_info": {
-    "project_number": "293130896197",
-    "firebase_url": "https://fogtest-4244a-default-rtdb.asia-southeast1.firebasedatabase.app",
-    "project_id": "fogtest-4244a",
-    "storage_bucket": "fogtest-4244a.appspot.com"
+    "project_number": "770800654249",
+    "firebase_url": "https://test-7ffef-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "test-7ffef",
+    "storage_bucket": "test-7ffef.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:293130896197:android:1ef328f24455c8f591342c",
+        "mobilesdk_app_id": "1:770800654249:android:0a2a8216b8875b526296b8",
         "android_client_info": {
           "package_name": "com.leadstepapp"
         }
@@ -16,7 +16,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAq6p5we6104GBcDjH-BghhYOyPrZ5erV4"
+          "current_key": "AIzaSyCH2eV7LmPNO0DjOutgfXChS4Xgg3AsQLI"
         }
       ],
       "services": {
