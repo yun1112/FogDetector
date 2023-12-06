@@ -26,6 +26,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,10 +35,12 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
+import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 public abstract class BlunoLibrary extends AppCompatActivity {
 
@@ -194,6 +197,12 @@ public abstract class BlunoLibrary extends AppCompatActivity {
 	public boolean mConnectedV = false;
 
 	private final static String TAG = BlunoLibrary.class.getSimpleName();
+	private String uid;
+	private BluetoothDevice bleDevice;
+	private ArrayAdapter<String> deviceName;
+	private ArrayAdapter<String> deviceID;
+	private Set<BluetoothDevice> pairedDevices;
+	private String choseID;
 
 	private Runnable mConnectingOverTimeRunnableL = new Runnable() {
 		@Override
@@ -274,6 +283,8 @@ public abstract class BlunoLibrary extends AppCompatActivity {
 			((Activity) mainContext).finish();
 		}
 
+		deviceName = new ArrayAdapter<String>(this, android.R.layout.simple_expandable_list_item_1);
+		deviceID = new ArrayAdapter<String>(this, android.R.layout.simple_expandable_list_item_1);
 
 		Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
 		bindService(gattServiceIntent, mServiceConnectionL, Context.BIND_AUTO_CREATE);
@@ -474,45 +485,173 @@ public abstract class BlunoLibrary extends AppCompatActivity {
 		// fire an intent to display a dialog asking the user to grant
 		// permission to enable it.
 		if (!mBluetoothAdapterL.isEnabled()) {
-			if (!mBluetoothAdapterL.isEnabled()) {
-				Intent enableBtIntent = new Intent(
-						BluetoothAdapter.ACTION_REQUEST_ENABLE);
-				if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-					// TODO: Consider calling
-					//    ActivityCompat#requestPermissions
-					// here to request the missing permissions, and then overriding
-					//   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-					//                                          int[] grantResults)
-					// to handle the case where the user grants the permission. See the documentation
-					// for ActivityCompat#requestPermissions for more details.
+			Intent enableBtIntent = new Intent(
+					BluetoothAdapter.ACTION_REQUEST_ENABLE);
+			if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+				// TODO: Consider calling
+				//    ActivityCompat#requestPermissions
+				// here to request the missing permissions, and then overriding
+				//   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+				//                                          int[] grantResults)
+				// to handle the case where the user grants the permission. See the documentation
+				// for ActivityCompat#requestPermissions for more details.
 //					return;
-				}
-				((Activity) mainContext).startActivityForResult(enableBtIntent, REQUEST_ENABLE_BTL);
 			}
+			((Activity) mainContext).startActivityForResult(enableBtIntent, REQUEST_ENABLE_BTL);
+			showBTDList(mBluetoothAdapterL);
 		}
 
 		if (!mBluetoothAdapterR.isEnabled()) {
-			if (!mBluetoothAdapterR.isEnabled()) {
-				Intent enableBtIntent = new Intent(
-						BluetoothAdapter.ACTION_REQUEST_ENABLE);
-				((Activity) mainContext).startActivityForResult(enableBtIntent, REQUEST_ENABLE_BTR);
-			}
+			Intent enableBtIntent = new Intent(
+					BluetoothAdapter.ACTION_REQUEST_ENABLE);
+			((Activity) mainContext).startActivityForResult(enableBtIntent, REQUEST_ENABLE_BTR);
+			showBTDList(mBluetoothAdapterR);
 		}
 
-		if (!mBluetoothAdapterV.isEnabled()) {
-			if (!mBluetoothAdapterV.isEnabled()) {
-				Intent enableBtIntent = new Intent(
-						BluetoothAdapter.ACTION_REQUEST_ENABLE);
-				((Activity) mainContext).startActivityForResult(enableBtIntent, REQUEST_ENABLE_BTV);
-			}
-		}
+//		if (!mBluetoothAdapterV.isEnabled()) {
+//			if (!mBluetoothAdapterV.isEnabled()) {
+//				Intent enableBtIntent = new Intent(
+//						BluetoothAdapter.ACTION_REQUEST_ENABLE);
+//				((Activity) mainContext).startActivityForResult(enableBtIntent, REQUEST_ENABLE_BTV);
+//			}
+//		}
 
 		mainContext.registerReceiver(mGattUpdateReceiverL, makeGattUpdateIntentFilterL());
 		mainContext.registerReceiver(mGattUpdateReceiverR, makeGattUpdateIntentFilterR());
-		mainContext.registerReceiver(mGattUpdateReceiverV, makeGattUpdateIntentFilterV());
+//		mainContext.registerReceiver(mGattUpdateReceiverV, makeGattUpdateIntentFilterV());
 
 	}
 
+	public BluetoothAdapter getBluetoothAdapterL() {
+		return mBluetoothAdapterL;
+	}
+
+	public BluetoothAdapter getBluetoothAdapterR() {
+		return mBluetoothAdapterR;
+	}
+	public void showBTDList(BluetoothAdapter mBluetoothAdapter) {
+		if (ActivityCompat.checkSelfPermission(mainContext, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+			// TODO: Consider calling
+			//    ActivityCompat#requestPermissions
+			pairedDevices = mBluetoothAdapter.getBondedDevices();
+
+			final ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+					mainContext,
+					R.layout.bluetooth_list);
+
+			if (pairedDevices.size() > 0) {
+				for (BluetoothDevice device : pairedDevices) {
+					String str = "已配對完成的裝置有 " + device.getName() + " " + device.getAddress() + "\n";
+					uid = device.getAddress();
+					Log.d("selectBTDevice: ", str);
+					bleDevice = device;
+					deviceName.add(str);//將以配對的裝置名稱儲存，並顯示於LIST清單中
+					deviceID.add(uid); //好像沒用到
+					adapter.add(str);
+				}
+
+				chooseBTD(adapter);
+
+
+			}
+			return;
+		}
+
+	}
+
+	private void chooseBTD(ArrayAdapter<String> adapter) {
+		AlertDialog.Builder alertBuilder = new AlertDialog.Builder(
+				mainContext);
+		alertBuilder.setTitle("Choose to Bluetooth Device");
+
+		alertBuilder.setNegativeButton("Cancel",
+				new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog,
+										int which) {
+						dialog.dismiss();
+					}
+				});
+
+		alertBuilder.setAdapter(adapter,
+				new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog,
+										int id) {
+						System.out.println("device:"+deviceID);
+						System.out.println("id:"+id);
+						String strName = adapter.getItem(id);
+						choseID = deviceID.getItem(id);
+                        Toast.makeText(mainContext, "選擇了:" + choseID, Toast.LENGTH_SHORT).show();
+//						deviceName.clear();
+//
+						try {
+							connectBT(choseID);
+						} catch (IOException e) {
+							throw new RuntimeException(e);
+						}
+					}
+				});
+		alertBuilder.show();
+	}
+
+	private void connectBT(String choseID) throws IOException {
+//		UUID uuid = UUID.fromString(_UUID); //藍芽模組UUID好像都是這樣
+
+		if (pairedDevices != null) {
+			for (BluetoothDevice device : pairedDevices) {
+				bleDevice = device;
+				System.out.println("device:"+device);
+
+				if (device.getAddress().equals(choseID))
+					break;
+			}
+		}
+
+		if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+			// TODO: Consider calling
+			//    ActivityCompat#requestPermissions
+//            return;
+		}
+
+//		bluesoccket = bleDevice.createRfcommSocketToServiceRecord(uuid); //使用被選擇的設備UUID建立連線
+//
+//		if (bleDevice != null) { //DeviceID != null // 如果有找到設備
+//			try {
+//				mBluetoothAdapter.cancelDiscovery();
+//				bluesoccket.connect();
+//
+//				if(!bluesoccket.isConnected()) return;
+//				mmOuputStream = bluesoccket.getOutputStream();
+//				mmInputStream = bluesoccket.getInputStream();
+//				isChecked = true;
+//
+//				beginListenForData();
+//
+//				textDevice.setText(bleDevice.getName());
+//				connectBtn.setText("DISCONNECT");
+//				connectBtn.setBackgroundResource(R.drawable.edit_round_black);
+//				Toast.makeText(myActivity, "Success to connect", Toast.LENGTH_SHORT).show();
+//			} catch (SocketException e) {
+//				Toast.makeText(myActivity, "Failed to connect", Toast.LENGTH_SHORT).show();
+//				bluesoccket.close();
+//			} catch (IOException e) {
+//				Toast.makeText(myActivity, "Failed to connect", Toast.LENGTH_SHORT).show();
+//				bluesoccket.close();
+//			}
+//		}
+
+	}
+
+	private void disconnectBTD() throws IOException {
+//		bluesoccket.close();
+//		imgPM.setImageResource(R.drawable.bluetooth);
+//		connectBtn.setBackgroundResource(R.drawable.edit_round_white);
+//		textDevice.setText("Device");
+//		textStatus.setText("Disconnected");
+//		textResult.setText("Connect to Bluetooth");
+//		connectBtn.setText("CONNECT");
+//		connectBtn.setTextColor(Color.parseColor("#FFFFFF"));
+//		bgLayout.setBackground(myActivity.getResources().getDrawable(R.drawable.gradient_disconnect));
+	}
 
 	public void onPauseProcess() {
 		System.out.println("BLUNOActivity onPause");

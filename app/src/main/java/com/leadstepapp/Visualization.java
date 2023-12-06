@@ -363,6 +363,7 @@ public class Visualization extends BlunoLibrary {
                 Log.d(String.valueOf(is_R_insole_connected), "is_R_insole_connected: ");
                 Log.d(String.valueOf(isChecked), "isChecked: ");
                 Log.d(String.valueOf(R_insole_mac), "R_insole_mac: ");
+                showBTDList(getBluetoothAdapterR());
 
                 if (isChecked) {
                     connectDevice(R_insole_mac);

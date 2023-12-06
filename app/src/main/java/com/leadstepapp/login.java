@@ -1,10 +1,12 @@
 package com.leadstepapp;
 
 import android.Manifest;
+import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -59,6 +61,7 @@ public class login extends AppCompatActivity {
 
         // Read data from the database
 //        readData();
+        requestBluetoothPermission(this, 1); // Request permission for Bluetooth(above API30?)
 
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
@@ -91,37 +94,56 @@ public class login extends AppCompatActivity {
         StartBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                    timer.scheduleAtFixedRate(new TimerTask() {
-                        @Override
-                        public void run() {
-                            writeData();
-//                                sendToFirebase(rightDataDict,"Right_insole");
-//                                Log.d(TAG, "jinkatama: " + RListDict.size());
-//                                RListDict.clear();
-//                                RList.clear();
-//                                Log.d(TAG, "jinkatama: " + RListDict.size());
-                        }
-                    }, 1000, 1000);
-                    Toast.makeText(getApplicationContext(), "DB.", Toast.LENGTH_SHORT).show();
-
+//                    test();
+                Toast.makeText(login.this, "Login successfully", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(getApplicationContext(), Visualization.class);
+                Bundle extras = new Bundle();
+                extras.putString("PATIENT_NAME", PatientN.getText().toString());
+                extras.putString("PATIENT_ID", PatientID.getText().toString());
+                extras.putString("DOCTOR_NAME", DoctorN.getText().toString());
+                extras.putString("DOCTOR_ID", DoctorID.getText().toString());
+                intent.putExtras(extras);
+                startActivity(intent);
                 }
 
-//                Toast.makeText(login.this, "Login successfully", Toast.LENGTH_SHORT).show();
-//                Intent intent = new Intent(getApplicationContext(), Visualization.class);
-//                Bundle extras = new Bundle();
-//                extras.putString("PATIENT_NAME", PatientN.getText().toString());
-//                extras.putString("PATIENT_ID", PatientID.getText().toString());
-//                extras.putString("DOCTOR_NAME", DoctorN.getText().toString());
-//                extras.putString("DOCTOR_ID", DoctorID.getText().toString());
-//                intent.putExtras(extras);
-//                startActivity(intent);
-
-//            }
         });
 
 
     }
 
+    private static final String[] BLE_PERMISSIONS = new String[]{
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+    };
+
+    private static final String[] ANDROID_12_BLE_PERMISSIONS = new String[]{
+            Manifest.permission.BLUETOOTH_SCAN,
+            Manifest.permission.BLUETOOTH_CONNECT,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+    };
+
+    public static void requestBluetoothPermission(Activity activity, int requestCode) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+            ActivityCompat.requestPermissions(activity, ANDROID_12_BLE_PERMISSIONS, requestCode);
+        else
+            ActivityCompat.requestPermissions(activity, BLE_PERMISSIONS, requestCode);
+    }
+
+    private void test() {
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                writeData();
+//                                sendToFirebase(rightDataDict,"Right_insole");
+//                                Log.d(TAG, "jinkatama: " + RListDict.size());
+//                                RListDict.clear();
+//                                RList.clear();
+//                                Log.d(TAG, "jinkatama: " + RListDict.size());
+            }
+        }, 1000, 1000);
+        Toast.makeText(getApplicationContext(), "DB.", Toast.LENGTH_SHORT).show();
+
+    }
     private void writeData() {
         Date today = new Date();
 
