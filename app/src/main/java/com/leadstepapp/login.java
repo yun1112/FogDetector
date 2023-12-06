@@ -8,7 +8,10 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -88,11 +91,59 @@ public class login extends AppCompatActivity {
 //        DoctorN = findViewById(R.id.doctor_name);
 //        DoctorID = findViewById(R.id.doctor_id);
         StartBtn = findViewById(R.id.start_button);
+        PatientN.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int start, int count, int after) {
+                // This method is called to notify you that characters within `start` to `start + before` are about to be replaced with new text with a length of `after`.
+            }
 
+            @Override
+            public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
+                System.out.println("ENTER");
+                System.out.println(PatientN.getText()+", length: "+PatientN.length());
+                if(PatientN.length() > 0){
+                    StartBtn.setBackgroundResource(R.drawable.rounded_corner);
+                    StartBtn.setEnabled(true);
+                }
+                else{
+                    StartBtn.setBackgroundResource(R.drawable.rounded_corner_gray);
+                    StartBtn.setEnabled(false);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                String typedText = editable.toString();
+
+            }
+
+        });
+        PatientN.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View view, int keyCode, KeyEvent keyEvent) {
+                switch (keyCode){
+                    case KeyEvent.KEYCODE_ENTER:
+//                        System.out.println("ENTER");
+//                        System.out.println(PatientN.getText()+", length: "+PatientN.length());
+//                        if(PatientN.length() > 0){
+//                            StartBtn.setBackgroundResource(R.drawable.rounded_corner);
+//                            StartBtn.setEnabled(true);
+//                        }
+//                        else{
+//                            StartBtn.setBackgroundResource(R.drawable.rounded_corner_gray);
+//                            StartBtn.setEnabled(false);
+//                        }
+                }
+                return false;
+            }
+
+
+        });
         usersRef = mDatabase.child("user"); // user name
         StartBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
 //                    test();
                 Toast.makeText(login.this, "Login successfully", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(getApplicationContext(), Visualization.class);
