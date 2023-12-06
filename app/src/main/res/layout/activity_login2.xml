@@ -93,8 +93,7 @@
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="300dp"
-            android:layout_marginTop="80dp"
+            android:layout_height="match_parent"
             android:layout_gravity="center">
 
 
@@ -119,7 +118,7 @@
                         android:layout_marginTop="15dp"
                         android:layout_marginEnd="15dp"
                         android:layout_marginBottom="15dp"
-                        android:text="User Name"
+                        android:text="Patient Name"
                         android:textColor="#8A2BE2"
                         android:textSize="14sp"
                         android:textStyle="bold" />
@@ -129,6 +128,84 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_below="@+id/tvpatientName"
+                        android:layout_marginLeft="15dp"
+                        android:layout_marginRight="15dp"
+                        android:drawablePadding="30dp"
+                        android:inputType="text"
+                        android:maxLines="1"
+                        android:padding="10dp" />
+
+                    <TextView
+                        android:id="@+id/tvPatientID"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/patient_name"
+                        android:layout_marginStart="15dp"
+                        android:layout_marginTop="15dp"
+                        android:layout_marginEnd="15dp"
+                        android:layout_marginBottom="15dp"
+                        android:text="Patient ID"
+                        android:textColor="#8A2BE2"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <EditText
+                        android:id="@+id/patient_id"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/tvPatientID"
+                        android:layout_marginLeft="15dp"
+                        android:layout_marginRight="15dp"
+                        android:drawablePadding="30dp"
+                        android:inputType="text"
+                        android:maxLines="1"
+                        android:padding="10dp" />
+
+                    <TextView
+                        android:id="@+id/tvDoctorName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/patient_id"
+                        android:layout_marginStart="15dp"
+                        android:layout_marginTop="15dp"
+                        android:layout_marginEnd="15dp"
+                        android:layout_marginBottom="15dp"
+                        android:text="Doctor Name"
+                        android:textColor="#8A2BE2"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <EditText
+                        android:id="@+id/doctor_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/tvDoctorName"
+                        android:layout_marginLeft="15dp"
+                        android:layout_marginRight="15dp"
+                        android:drawablePadding="30dp"
+                        android:inputType="text"
+                        android:maxLines="1"
+                        android:padding="10dp" />
+
+                    <TextView
+                        android:id="@+id/tvDoctorID"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/doctor_name"
+                        android:layout_marginStart="15dp"
+                        android:layout_marginTop="15dp"
+                        android:layout_marginEnd="15dp"
+                        android:layout_marginBottom="15dp"
+                        android:text="Doctor ID"
+                        android:textColor="#8A2BE2"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <EditText
+                        android:id="@+id/doctor_id"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/tvDoctorID"
                         android:layout_marginLeft="15dp"
                         android:layout_marginRight="15dp"
                         android:drawablePadding="30dp"
@@ -149,7 +226,7 @@
                 android:layout_centerHorizontal="true"
                 android:layout_marginLeft="35dp"
                 android:layout_marginRight="35dp"
-                android:layout_marginBottom="-100dp"
+                android:layout_marginBottom="-20dp"
                 android:elevation="10dp">
 
                 <Button

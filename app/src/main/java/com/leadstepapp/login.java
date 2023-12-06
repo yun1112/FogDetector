@@ -23,7 +23,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.type.DateTime;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -85,9 +84,9 @@ public class login extends AppCompatActivity {
         }
 
         PatientN = findViewById(R.id.patient_name);
-        PatientID = findViewById(R.id.patient_id);
-        DoctorN = findViewById(R.id.doctor_name);
-        DoctorID = findViewById(R.id.doctor_id);
+//        PatientID = findViewById(R.id.patient_id);
+//        DoctorN = findViewById(R.id.doctor_name);
+//        DoctorID = findViewById(R.id.doctor_id);
         StartBtn = findViewById(R.id.start_button);
 
         usersRef = mDatabase.child("user"); // user name
@@ -99,9 +98,9 @@ public class login extends AppCompatActivity {
                 Intent intent = new Intent(getApplicationContext(), Visualization.class);
                 Bundle extras = new Bundle();
                 extras.putString("PATIENT_NAME", PatientN.getText().toString());
-                extras.putString("PATIENT_ID", PatientID.getText().toString());
-                extras.putString("DOCTOR_NAME", DoctorN.getText().toString());
-                extras.putString("DOCTOR_ID", DoctorID.getText().toString());
+//                extras.putString("PATIENT_ID", PatientID.getText().toString());
+//                extras.putString("DOCTOR_NAME", DoctorN.getText().toString());
+//                extras.putString("DOCTOR_ID", DoctorID.getText().toString());
                 intent.putExtras(extras);
                 startActivity(intent);
                 }

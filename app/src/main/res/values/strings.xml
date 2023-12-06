@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Lead Step</string>
+    <string name="app_name">Anomaly Detector</string>
     <string name="messages">Messages:</string>
     <string name="message">Message</string>
     <string name="send">Send</string>

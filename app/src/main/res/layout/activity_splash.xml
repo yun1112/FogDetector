@@ -5,16 +5,31 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center"
+    android:background="#74D689"
     tools:context=".SplashActivity">
+<!--    android:background="#ACD741"-->
 
     <ImageView
-        android:id="@+id/a00"
+        android:id="@+id/splachImg"
         android:layout_width="251dp"
         android:layout_height="238dp"
+        android:layout_centerHorizontal="true"
         android:src="@drawable/walking"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tvWelcome"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="30dp"
+        android:text="Anomaly Detector"
+        android:layout_below="@+id/splachImg"
+        android:textSize="35sp"
+        android:textStyle="bold"
+        android:textColor="@color/colorWhite" />
 
 </RelativeLayout>
