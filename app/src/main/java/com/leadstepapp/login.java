@@ -39,7 +39,7 @@ import java.util.TimerTask;
 
 public class login extends AppCompatActivity {
     EditText PatientN, PatientID, DoctorN, DoctorID, Email;
-    Button StartBtn;
+    Button startBtn;
     private DatabaseReference mDatabase;
     private Timer timer = new Timer();
     DatabaseReference usersRef;
@@ -90,7 +90,7 @@ public class login extends AppCompatActivity {
 //        PatientID = findViewById(R.id.patient_id);
 //        DoctorN = findViewById(R.id.doctor_name);
 //        DoctorID = findViewById(R.id.doctor_id);
-        StartBtn = findViewById(R.id.start_button);
+        startBtn = findViewById(R.id.start_button);
         PatientN.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int start, int count, int after) {
@@ -102,12 +102,12 @@ public class login extends AppCompatActivity {
                 System.out.println("ENTER");
                 System.out.println(PatientN.getText()+", length: "+PatientN.length());
                 if(PatientN.length() > 0){
-                    StartBtn.setBackgroundResource(R.drawable.rounded_corner);
-                    StartBtn.setEnabled(true);
+                    startBtn.setBackgroundResource(R.drawable.rounded_corner);
+                    startBtn.setEnabled(true);
                 }
                 else{
-                    StartBtn.setBackgroundResource(R.drawable.rounded_corner_gray);
-                    StartBtn.setEnabled(false);
+                    startBtn.setBackgroundResource(R.drawable.rounded_corner_gray);
+                    startBtn.setEnabled(false);
                 }
             }
 
@@ -118,29 +118,8 @@ public class login extends AppCompatActivity {
             }
 
         });
-        PatientN.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View view, int keyCode, KeyEvent keyEvent) {
-                switch (keyCode){
-                    case KeyEvent.KEYCODE_ENTER:
-//                        System.out.println("ENTER");
-//                        System.out.println(PatientN.getText()+", length: "+PatientN.length());
-//                        if(PatientN.length() > 0){
-//                            StartBtn.setBackgroundResource(R.drawable.rounded_corner);
-//                            StartBtn.setEnabled(true);
-//                        }
-//                        else{
-//                            StartBtn.setBackgroundResource(R.drawable.rounded_corner_gray);
-//                            StartBtn.setEnabled(false);
-//                        }
-                }
-                return false;
-            }
-
-
-        });
         usersRef = mDatabase.child("user"); // user name
-        StartBtn.setOnClickListener(new View.OnClickListener() {
+        startBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 

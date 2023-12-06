@@ -77,7 +77,7 @@ public class Visualization extends BlunoLibrary {
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     private Button startBtn;
     private Button startLeftBtn, startRightBtn;
-    private ToggleButton connectLeftBtn, connectRightBtn;
+    private Button connectLeftBtn, connectRightBtn;
     //    private String L_insole_mac = "20:17:12:04:04:57";
 //    private String R_insole_mac = "20:17:12:04:19:55";
 //    private String L_insole_mac = "20:19:06:20:08:07";
@@ -166,6 +166,8 @@ public class Visualization extends BlunoLibrary {
 
     static boolean active = false;
 
+    private boolean isCheckedL = false;
+    private boolean isCheckedR = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -209,8 +211,8 @@ public class Visualization extends BlunoLibrary {
             finish();
         }
 
-        connectRightBtn = (ToggleButton) findViewById(R.id.connectRight_button);
-        connectLeftBtn = (ToggleButton) findViewById(R.id.connectLeft_button);
+        connectRightBtn = findViewById(R.id.connectRight_button);
+        connectLeftBtn = findViewById(R.id.connectLeft_button);
 //        startLeftBtn = (Button) findViewById(R.id.startLeft_button);
 //        startRightBtn = (Button) findViewById(R.id.startRight_button);
         startBtn = (Button) findViewById(R.id.start_button);
@@ -249,24 +251,28 @@ public class Visualization extends BlunoLibrary {
         for (int i = 0; i < ns_list.length; i++) {
             non_sensor_indeces.add(ns_list[i]);
         }
-        connectLeftBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
-                Log.d(String.valueOf(isChecked), "isChecked: ");
-                if (isChecked) {
-                    connectDevice(L_insole_mac);
-                } else {
-                    if (is_L_insole_connected)
-                        if (is_L_insole_started)
-                            left_insole_device_interface.stopInsole();
-                    startLeftBtn.setText("Start Left");
-                    is_L_insole_started = false;
-                    bluetoothManager.closeDevice(left_insole_device_interface);
-                    is_L_insole_connected = false;
-                    Toast.makeText(Visualization.this, "Left Insole Disconnected.", Toast.LENGTH_SHORT).show();
+
+        connectLeftBtn.setOnClickListener(new Button.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Log.d(String.valueOf(isCheckedL), "isChecked: ");
+                    showBTDList(getBluetoothAdapterL());
+
+                    if (!isCheckedL) {
+                        connectDevice(L_insole_mac);
+                    } else {
+                        if (is_L_insole_connected)
+                            if (is_L_insole_started)
+                                left_insole_device_interface.stopInsole();
+//                        startLeftBtn.setText("Start Left");
+                        is_L_insole_started = false;
+                        bluetoothManager.closeDevice(left_insole_device_interface);
+                        is_L_insole_connected = false;
+                        Toast.makeText(Visualization.this, "Left Insole Disconnected.", Toast.LENGTH_SHORT).show();
+
+                    }
 
                 }
-            }
 
             private void connectDevice(String mac) {
                 Log.d(mac, "mac: ");
@@ -353,18 +359,17 @@ public class Visualization extends BlunoLibrary {
                 // Handle the error
                 Log.d(TAG, "onError: ");
             }
+            });
 
-        });
-
-        connectRightBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        connectRightBtn.setOnClickListener(new Button.OnClickListener() {
             @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+            public void onClick(View v) {
                 Log.d(String.valueOf(is_R_insole_connected), "is_R_insole_connected: ");
-                Log.d(String.valueOf(isChecked), "isChecked: ");
+                Log.d(String.valueOf(isCheckedR), "isChecked: ");
                 Log.d(String.valueOf(R_insole_mac), "R_insole_mac: ");
                 showBTDList(getBluetoothAdapterR());
 
-                if (isChecked) {
+                if (isCheckedR) {
                     connectDevice(R_insole_mac);
 
                 } else {
@@ -479,6 +484,7 @@ public class Visualization extends BlunoLibrary {
                 // Handle the error
             }
         });
+
 /*
         startLeftBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -1475,34 +1481,37 @@ public class Visualization extends BlunoLibrary {
         startBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                startBtn.setBackgroundResource(R.drawable.rounded_corner);
+                startBtn.setEnabled(true);
+
                 // startBtn.setClickable(true);
 
-                if (is_R_insole_connected) {
-                    if (is_R_insole_started) {
-                        right_insole_device_interface.stopInsole();
-                        is_R_insole_started = false;
-                        startRightBtn.setText("Start Right");
-                        right_timer.cancel();
-                    } else {
-                        right_insole_device_interface.startInsole();
-                        is_R_insole_started = true;
-                        right_timer.scheduleAtFixedRate(new TimerTask() {
-                            @Override
-                            public void run() {
-//                                sendToFirebase(rightDataDict,"Right_insole");
-//                                Log.d(TAG, "jinkatama: " + RListDict.size());
-//                                RListDict.clear();
-//                                RList.clear();
-//                                Log.d(TAG, "jinkatama: " + RListDict.size());
-                            }
-                        }, 1000, 1000);
-                        startRightBtn.setText("Stop Right");
-                        Toast.makeText(Visualization.this, "Right Insole Started.", Toast.LENGTH_SHORT).show();
-
-                    }
-                } else {
-                    Toast.makeText(Visualization.this, "Right Insole Not Connected!", Toast.LENGTH_SHORT).show();
-                }
+//                if (is_R_insole_connected) {
+//                    if (is_R_insole_started) {
+//                        right_insole_device_interface.stopInsole();
+//                        is_R_insole_started = false;
+//                        startRightBtn.setText("Start Right");
+//                        right_timer.cancel();
+//                    } else {
+//                        right_insole_device_interface.startInsole();
+//                        is_R_insole_started = true;
+//                        right_timer.scheduleAtFixedRate(new TimerTask() {
+//                            @Override
+//                            public void run() {
+////                                sendToFirebase(rightDataDict,"Right_insole");
+////                                Log.d(TAG, "jinkatama: " + RListDict.size());
+////                                RListDict.clear();
+////                                RList.clear();
+////                                Log.d(TAG, "jinkatama: " + RListDict.size());
+//                            }
+//                        }, 1000, 1000);
+//                        startRightBtn.setText("Stop Right");
+//                        Toast.makeText(Visualization.this, "Right Insole Started.", Toast.LENGTH_SHORT).show();
+//
+//                    }
+//                } else {
+//                    Toast.makeText(Visualization.this, "Right Insole Not Connected!", Toast.LENGTH_SHORT).show();
+//                }
             }
         });
 
