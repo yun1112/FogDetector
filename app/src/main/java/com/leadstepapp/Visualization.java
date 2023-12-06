@@ -5,9 +5,7 @@ import static android.content.ContentValues.TAG;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
@@ -23,7 +21,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -45,8 +42,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.text.NumberFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -70,8 +65,6 @@ import okhttp3.Response;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Visualization extends BlunoLibrary {
 
@@ -216,8 +209,8 @@ public class Visualization extends BlunoLibrary {
 
         connectRightBtn = (ToggleButton) findViewById(R.id.connectRight_button);
         connectLeftBtn = (ToggleButton) findViewById(R.id.connectLeft_button);
-        startLeftBtn = (Button) findViewById(R.id.startLeft_button);
-        startRightBtn = (Button) findViewById(R.id.startRight_button);
+//        startLeftBtn = (Button) findViewById(R.id.startLeft_button);
+//        startRightBtn = (Button) findViewById(R.id.startRight_button);
 
         coyText = (TextView) findViewById(R.id.t1);
 
@@ -480,7 +473,7 @@ public class Visualization extends BlunoLibrary {
                 // Handle the error
             }
         });
-
+/*
         startLeftBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -1471,7 +1464,9 @@ public class Visualization extends BlunoLibrary {
                 }
             }
         });
+*/
 
+        /*
         //Vibrator
         buttonScanL = (Button) findViewById(R.id.btnScanL);					//initial the button for scanning the BLE device
         buttonScanL.setOnClickListener(new View.OnClickListener() {
@@ -1506,7 +1501,7 @@ public class Visualization extends BlunoLibrary {
             }
         });
 
-
+        */
     }
 
 //    public void RightData(Map<String,Object>  data, String of_insole){
