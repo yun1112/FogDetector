@@ -72,8 +72,10 @@ public class Visualization extends BlunoLibrary {
     Interpreter tflite;
 
     private TextView text;
+    private TextView userName;
 
     FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private Button startBtn;
     private Button startLeftBtn, startRightBtn;
     private ToggleButton connectLeftBtn, connectRightBtn;
     //    private String L_insole_mac = "20:17:12:04:04:57";
@@ -211,10 +213,14 @@ public class Visualization extends BlunoLibrary {
         connectLeftBtn = (ToggleButton) findViewById(R.id.connectLeft_button);
 //        startLeftBtn = (Button) findViewById(R.id.startLeft_button);
 //        startRightBtn = (Button) findViewById(R.id.startRight_button);
+        startBtn = (Button) findViewById(R.id.start_button);
+//        startBtn.setClickable(false);
 
         coyText = (TextView) findViewById(R.id.t1);
 
         text = (TextView) findViewById(R.id.t1);
+        userName = (TextView) findViewById(R.id.user_name);
+        userName.setText(PATIENT_NAME);
 
         heatMapRight = (HeatMap) findViewById(R.id.heatmapRight);
         heatMapLeft = (HeatMap) findViewById(R.id.heatmapLeft);
@@ -1466,6 +1472,40 @@ public class Visualization extends BlunoLibrary {
         });
 */
 
+        startBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // startBtn.setClickable(true);
+
+                if (is_R_insole_connected) {
+                    if (is_R_insole_started) {
+                        right_insole_device_interface.stopInsole();
+                        is_R_insole_started = false;
+                        startRightBtn.setText("Start Right");
+                        right_timer.cancel();
+                    } else {
+                        right_insole_device_interface.startInsole();
+                        is_R_insole_started = true;
+                        right_timer.scheduleAtFixedRate(new TimerTask() {
+                            @Override
+                            public void run() {
+//                                sendToFirebase(rightDataDict,"Right_insole");
+//                                Log.d(TAG, "jinkatama: " + RListDict.size());
+//                                RListDict.clear();
+//                                RList.clear();
+//                                Log.d(TAG, "jinkatama: " + RListDict.size());
+                            }
+                        }, 1000, 1000);
+                        startRightBtn.setText("Stop Right");
+                        Toast.makeText(Visualization.this, "Right Insole Started.", Toast.LENGTH_SHORT).show();
+
+                    }
+                } else {
+                    Toast.makeText(Visualization.this, "Right Insole Not Connected!", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
         /*
         //Vibrator
         buttonScanL = (Button) findViewById(R.id.btnScanL);					//initial the button for scanning the BLE device
@@ -1961,11 +2001,11 @@ public class Visualization extends BlunoLibrary {
     @Override
     protected void onStop() {
         super.onStop();
-        left_insole_device_interface.stopInsole();
-        right_insole_device_interface.stopInsole();
-        bluetoothManager.close();
-        is_L_insole_connected = false;
-        is_R_insole_connected = false;
+//        left_insole_device_interface.stopInsole();
+//        right_insole_device_interface.stopInsole();
+//        bluetoothManager.close();
+//        is_L_insole_connected = false;
+//        is_R_insole_connected = false;
         onStopProcess();
     }
 
