@@ -442,6 +442,28 @@ public class Visualization extends BlunoLibrary {
                         }
                     }
 
+
+                    if (left_data_len >= max_data_len + 15) {
+                        heatMapLeft.clearData();
+                        for (int i = 0; i < x_L.length; i++) {
+                            HeatMap.DataPoint point = new HeatMap.DataPoint(x_L[i], y[i], l_data_double_arr[i]);
+                            heatMapLeft.addData(point);
+                            heatMapLeft.forceRefresh();
+                        }
+                        Date date = new Date();
+//                        leftDataDict.put(String.valueOf(formatter.format(date)),Arrays.toString(l_data_double_arr));
+//                        LList.add(Arrays.toString(l_data_double_arr).replace("]", ""));
+//                        Log.d("TAG", "onMessageReceived: " + LList.size());
+//                        if (LList.size() == 1) {
+//                            LListDict.add(LList);
+//                        }
+                        left_package_count++;
+                        left_data_index = 0;
+                        left_sensor_data_count = 0;
+                        left_data_len = 0;
+                        is_L_insole_started = false;
+                    }
+
 //                    LList.add(Arrays.toString(l_data_double_arr).replace("]", ""));
 //                    if (LList.size() == 1){
 //                        LListDict.addAll(LList);
@@ -451,50 +473,50 @@ public class Visualization extends BlunoLibrary {
 //                    }
 
                     //if the data length reach the max_data_length, release the buffer and invert the start flag
-                    Visualization.this.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            System.out.println("mLeScanCallback onLeScan run ");
-
-                            if (left_data_len >= max_data_len + 15) {
-                                heatMapLeft.clearData();
-                                for (int i = 0; i < x_L.length; i++) {
-                                    HeatMap.DataPoint point = new HeatMap.DataPoint(x_L[i], y[i], l_data_double_arr[i]);
-                                    heatMapLeft.addData(point);
-                                    heatMapLeft.forceRefresh();
-                                }
-                                Date date = new Date();
-//                        leftDataDict.put(String.valueOf(formatter.format(date)),Arrays.toString(l_data_double_arr));
-//                        LList.add(Arrays.toString(l_data_double_arr).replace("]", ""));
-//                        Log.d("TAG", "onMessageReceived: " + LList.size());
-//                        if (LList.size() == 1) {
-//                            LListDict.add(LList);
+//                    Visualization.this.runOnUiThread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            System.out.println("mLeScanCallback onLeScan run ");
+//
+//                            if (left_data_len >= max_data_len + 15) {
+//                                heatMapLeft.clearData();
+//                                for (int i = 0; i < x_L.length; i++) {
+//                                    HeatMap.DataPoint point = new HeatMap.DataPoint(x_L[i], y[i], l_data_double_arr[i]);
+//                                    heatMapLeft.addData(point);
+//                                    heatMapLeft.forceRefresh();
+//                                }
+//                                Date date = new Date();
+////                        leftDataDict.put(String.valueOf(formatter.format(date)),Arrays.toString(l_data_double_arr));
+////                        LList.add(Arrays.toString(l_data_double_arr).replace("]", ""));
+////                        Log.d("TAG", "onMessageReceived: " + LList.size());
+////                        if (LList.size() == 1) {
+////                            LListDict.add(LList);
+////                        }
+//                                left_package_count++;
+//                                left_data_index = 0;
+//                                left_sensor_data_count = 0;
+//                                left_data_len = 0;
+//                                is_L_insole_started = false;
+//                            }
+//
 //                        }
-                                left_package_count++;
-                                left_data_index = 0;
-                                left_sensor_data_count = 0;
-                                left_data_len = 0;
-                                is_L_insole_started = false;
-                            }
-
-                        }
-                    });
+//                    });
 
 
-                    Visualization.this.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            System.out.println("mLeScanCallback onLeScan run ");
-                            List<Double> list = Arrays.asList(l_data_double_arr);
-                            int count = Collections.frequency(list,0.0);
-                            Log.d(String.valueOf(count), "count: ");
-
-                            Log.d(Arrays.toString(l_data_double_arr), "onMessageReceived l_data_double_arr: ");
-                            if(count<89)
-                                writeData(l_data_double_arr);
-
-                        }
-                    });
+//                    Visualization.this.runOnUiThread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            System.out.println("mLeScanCallback onLeScan run ");
+//                            List<Double> list = Arrays.asList(l_data_double_arr);
+//                            int count = Collections.frequency(list,0.0);
+//                            Log.d(String.valueOf(count), "count: ");
+//
+//                            Log.d(Arrays.toString(l_data_double_arr), "onMessageReceived l_data_double_arr: ");
+//                            if(count<89)
+//                                writeData(l_data_double_arr);
+//
+//                        }
+//                    });
 
 
                 }
