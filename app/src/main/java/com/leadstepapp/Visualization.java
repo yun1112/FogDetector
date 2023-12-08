@@ -5,9 +5,16 @@ import static android.content.ContentValues.TAG;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.core.app.ActivityCompat;
 
+import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.AssetFileDescriptor;
 import android.media.AudioManager;
 import android.media.ToneGenerator;
@@ -19,6 +26,7 @@ import android.os.Looper;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.TextView;
@@ -27,6 +35,8 @@ import android.widget.ToggleButton;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.leadstepapp.bluetoothseriallibrary.BluetoothManager;
 import com.leadstepapp.bluetoothseriallibrary.BluetoothSerialDevice;
@@ -63,6 +73,8 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 import java.util.Date;
+import java.util.Random;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -100,7 +112,9 @@ public class Visualization extends BlunoLibrary {
     private int max_data_len = 114;
     private int ns_list[] = {58, 76, 77, 78, 79, 80, 81, 82, 83, 84, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 112, 113, 114};
     private Double r_data_double_arr[] = new Double[89];
+
     private Double l_data_double_arr[] = new Double[89];
+
     private List<Integer> non_sensor_indeces = new ArrayList<Integer>(ns_list.length + 1);
     private SimpleBluetoothDeviceInterface left_insole_device_interface;
     private SimpleBluetoothDeviceInterface right_insole_device_interface;
@@ -168,7 +182,15 @@ public class Visualization extends BlunoLibrary {
 
     private boolean isCheckedL = false;
     private boolean isCheckedR = false;
-
+    private String uid;
+    private BluetoothDevice bleDevice;
+    private ArrayAdapter<String> deviceName;
+    private ArrayAdapter<String> deviceID;
+    private Set<BluetoothDevice> pairedDevices;
+    private String choseID;
+    private DatabaseReference mDatabase;
+    private Timer timer = new Timer();
+    DatabaseReference usersRef;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -205,6 +227,17 @@ public class Visualization extends BlunoLibrary {
         patientRecord.put("DOCTOR_NAME", DOCTOR_NAME);
         patientRecord.put("DOCTOR_ID", DOCTOR_ID);
         patientRecord.put("Date", formatter.format(date));
+
+        deviceName = new ArrayAdapter<String>(this, android.R.layout.simple_expandable_list_item_1);
+        deviceID = new ArrayAdapter<String>(this, android.R.layout.simple_expandable_list_item_1);
+
+        Arrays.fill(r_data_double_arr, 0.0);
+        Arrays.fill(l_data_double_arr, 0.0);
+
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+
+        usersRef = mDatabase.child("user"); // user name
+
         if (bluetoothManager == null) {
             // Bluetooth unavailable on this device :( tell the user
             Toast.makeText(getApplication(), "Bluetooth not available.", Toast.LENGTH_LONG).show(); // Replace context with your context instance.
@@ -256,10 +289,12 @@ public class Visualization extends BlunoLibrary {
                 @Override
                 public void onClick(View v) {
                     Log.d(String.valueOf(isCheckedL), "isChecked: ");
-                    showBTDList(getBluetoothAdapterL());
+
 
                     if (!isCheckedL) {
-                        connectDevice(L_insole_mac);
+                        showBTDList(getBluetoothAdapterL());
+//                        Log.d(getMAC(), "connectLeftBtn mac: ");
+//                        connectDevice(mac);
                     } else {
                         if (is_L_insole_connected)
                             if (is_L_insole_started)
@@ -273,9 +308,92 @@ public class Visualization extends BlunoLibrary {
                     }
 
                 }
+            public void showBTDList(BluetoothAdapter mBluetoothAdapter) {
+                if (ActivityCompat.checkSelfPermission(Visualization.this, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                    // TODO: Consider calling
+                    //    ActivityCompat#requestPermissions
+                    pairedDevices = mBluetoothAdapter.getBondedDevices();
 
-            private void connectDevice(String mac) {
-                Log.d(mac, "mac: ");
+                    final ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+                            Visualization.this,
+                            R.layout.bluetooth_list);
+
+                    if (pairedDevices.size() > 0) {
+                        for (BluetoothDevice device : pairedDevices) {
+                            String str = "已配對完成的裝置有 " + device.getName() + " " + device.getAddress() + "\n";
+                            uid = device.getAddress();
+                            Log.d("selectBTDevice: ", str);
+                            bleDevice = device;
+                            deviceName.add(str);//將以配對的裝置名稱儲存，並顯示於LIST清單中
+                            deviceID.add(uid); //好像沒用到
+                            adapter.add(str);
+                        }
+
+                        chooseBTD(adapter);
+
+
+                    }
+                    return;
+                }
+
+            }
+
+            private void chooseBTD(ArrayAdapter<String> adapter) {
+                AlertDialog.Builder alertBuilder = new AlertDialog.Builder(
+                        Visualization.this);
+                alertBuilder.setTitle("Choose a Bluetooth Device");
+
+                alertBuilder.setNegativeButton("Cancel",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog,
+                                                int which) {
+                                dialog.dismiss();
+                            }
+                        });
+
+                alertBuilder.setAdapter(adapter,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog,
+                                                int id) {
+                                System.out.println("device:"+deviceID);
+                                System.out.println("id:"+id);
+                                String strName = adapter.getItem(id);
+                                choseID = deviceID.getItem(id);
+                                Toast.makeText(Visualization.this, "Device:" + choseID, Toast.LENGTH_SHORT).show();
+                                deviceName.clear();
+//
+                                try {
+                                    connectBT(choseID);
+                                } catch (IOException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                        });
+                alertBuilder.show();
+            }
+
+
+            private String connectBT(String choseID) throws IOException {
+//		UUID uuid = UUID.fromString(_UUID); //藍芽模組UUID好像都是這樣
+
+                if (pairedDevices != null) {
+                    for (BluetoothDevice device : pairedDevices) {
+                        bleDevice = device;
+                        System.out.println("connectBT device:"+device);
+                        System.out.println("connectBT device:"+device.getAddress());
+                        System.out.println("connectBT device:"+choseID);
+                        connectDevice(choseID);
+                        if (device.getAddress().equals(choseID))
+                            break;
+                    }
+                }
+
+                return choseID;
+            }
+
+
+            public void connectDevice(String mac) {
+                Log.d(mac, "connectDevice mac!!: ");
                 bluetoothManager.openSerialDevice(mac)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
@@ -285,7 +403,10 @@ public class Visualization extends BlunoLibrary {
             private void onConnected(BluetoothSerialDevice connectedDevice) {
                 // You are now connected to this device!
                 // Here you may want to retain an instance to your device:
+                Log.d(connectedDevice.getMac(), "onConnected: connectedDevice");
                 left_insole_device_interface = connectedDevice.toSimpleDeviceInterface();
+                startBtn.setBackgroundResource(R.drawable.rounded_corner);
+                startBtn.setEnabled(true);
 
                 // Listen to bluetooth events
                 left_insole_device_interface.setListeners(message -> onMessageReceived(message), this::onMessageSent, this::onError);
@@ -297,6 +418,7 @@ public class Visualization extends BlunoLibrary {
             }
 
             private void onMessageReceived(String message) {
+
                 //store incoming bytes temporarily
                 if (!is_L_insole_started) {
                     left_temp_bytes += message + " ";
@@ -308,6 +430,8 @@ public class Visualization extends BlunoLibrary {
                 }
                 //if the start_bytes are found in the temporary buffer, start storing the incoming messages in the actual buffer
                 if (is_L_insole_started) {
+//                    int cnt = Collections.frequency(Arrays.asList(l_data_double_arr, 0.0));
+
                     left_data_len++;
                     if (left_data_len > 15) {
                         left_sensor_data_count++;
@@ -327,26 +451,52 @@ public class Visualization extends BlunoLibrary {
 //                    }
 
                     //if the data length reach the max_data_length, release the buffer and invert the start flag
-                    if (left_data_len >= max_data_len + 15) {
-                        heatMapLeft.clearData();
-                        for (int i = 0; i < x_L.length; i++) {
-                            HeatMap.DataPoint point = new HeatMap.DataPoint(x_L[i], y[i], l_data_double_arr[i]);
-                            heatMapLeft.addData(point);
-                            heatMapLeft.forceRefresh();
-                        }
-                        Date date = new Date();
+                    Visualization.this.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            System.out.println("mLeScanCallback onLeScan run ");
+
+                            if (left_data_len >= max_data_len + 15) {
+                                heatMapLeft.clearData();
+                                for (int i = 0; i < x_L.length; i++) {
+                                    HeatMap.DataPoint point = new HeatMap.DataPoint(x_L[i], y[i], l_data_double_arr[i]);
+                                    heatMapLeft.addData(point);
+                                    heatMapLeft.forceRefresh();
+                                }
+                                Date date = new Date();
 //                        leftDataDict.put(String.valueOf(formatter.format(date)),Arrays.toString(l_data_double_arr));
 //                        LList.add(Arrays.toString(l_data_double_arr).replace("]", ""));
 //                        Log.d("TAG", "onMessageReceived: " + LList.size());
 //                        if (LList.size() == 1) {
 //                            LListDict.add(LList);
 //                        }
-                        left_package_count++;
-                        left_data_index = 0;
-                        left_sensor_data_count = 0;
-                        left_data_len = 0;
-                        is_L_insole_started = false;
-                    }
+                                left_package_count++;
+                                left_data_index = 0;
+                                left_sensor_data_count = 0;
+                                left_data_len = 0;
+                                is_L_insole_started = false;
+                            }
+
+                        }
+                    });
+
+
+                    Visualization.this.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            System.out.println("mLeScanCallback onLeScan run ");
+                            List<Double> list = Arrays.asList(l_data_double_arr);
+                            int count = Collections.frequency(list,0.0);
+                            Log.d(String.valueOf(count), "count: ");
+
+                            Log.d(Arrays.toString(l_data_double_arr), "onMessageReceived l_data_double_arr: ");
+                            if(count<89)
+                                writeData(l_data_double_arr);
+
+                        }
+                    });
+
+
                 }
             }
 
@@ -357,7 +507,7 @@ public class Visualization extends BlunoLibrary {
 
             private void onError(Throwable error) {
                 // Handle the error
-                Log.d(TAG, "onError: ");
+                Log.d(String.valueOf(error), "onError: ");
             }
             });
 
@@ -367,7 +517,7 @@ public class Visualization extends BlunoLibrary {
                 Log.d(String.valueOf(is_R_insole_connected), "is_R_insole_connected: ");
                 Log.d(String.valueOf(isCheckedR), "isChecked: ");
                 Log.d(String.valueOf(R_insole_mac), "R_insole_mac: ");
-                showBTDList(getBluetoothAdapterR());
+//                showBTDList(getBluetoothAdapterR());
 
                 if (isCheckedR) {
                     connectDevice(R_insole_mac);
@@ -478,7 +628,6 @@ public class Visualization extends BlunoLibrary {
                     }
                 }
             }
-
 
             private void onError(Throwable error) {
                 // Handle the error
@@ -1481,9 +1630,93 @@ public class Visualization extends BlunoLibrary {
         startBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startBtn.setBackgroundResource(R.drawable.rounded_corner);
-                startBtn.setEnabled(true);
 
+                Log.d(String.valueOf(is_L_insole_connected), "is_L_insole_connected: ");
+
+                if (is_L_insole_connected) {
+                    if (is_L_insole_started) {
+                        left_insole_device_interface.stopInsole();
+                        is_L_insole_started = false;
+                        startBtn.setText("Start Left");
+                        left_timer.cancel();
+
+                    } else {
+                        left_insole_device_interface.startInsole();
+                        is_L_insole_started = true;
+                        startBtn.setText("Stop Left");
+
+                        left_timer = new Timer(); // At this line a new Thread will be created
+                        left_timer.scheduleAtFixedRate(new TimerTask() {
+                            @Override
+                            public void run() {
+                                //DO YOUR THINGS
+                                runOnUiThread(new Runnable() {
+
+                                    @Override
+                                    public void run() {
+//                                        Log.d(Arrays.toString(l_data_double_arr), "@@@l_data_double_arr: ");
+
+//                                        String ListDataDicts = ListData.toString();
+//                                        Log.d("TAG", "onMessageReceived: " + LListDict.size());
+
+//                                        ListData.addAll(LListDict);
+//                                        ListData.addAll(RListDict);
+                                        String ListDataDicts = LListDict.toString();
+//                                        LeftData(ListDataDicts.replace("],", "];"), "Left_Insole");
+//
+//                                        Log.d(TAG, "jinkatama: " + ListDataDicts);
+//
+//                                        ListData.clear();
+//                                        LListDict.clear();
+//                                        RListDict.clear();
+//                                        LList.clear();
+//                                        RList.clear();
+
+                                        int n_L=0;
+                                        int n_R=0;
+                                        for (int i = 0; i < 89; i++) {
+//                                            Log.d(Arrays.toString(l_data_double_arr), "l_data_double_arr: ");
+//                                            Log.d(Arrays.toString(r_data_double_arr), "r_data_double_arr: ");
+                                            if(l_data_double_arr[i]>r_data_double_arr[i]){
+                                                n_L=n_L+1;
+                                            }
+                                            else{
+                                                n_R=n_R+1;
+                                            }
+                                        }
+                                        if(n_L>n_R){
+                                            if (active == false){
+                                                active=true;
+                                                Log.d(TAG, "ucokbaba: " + "Pertama Nyala");
+                                                serialSendV("1");
+                                            } else {
+                                                Log.d(TAG, "ucokbaba: " + "Sudah Nyala");
+                                            }
+                                        } else if(n_L==n_R){
+                                            Log.d(TAG, "ucokbaba: " + "FOG");
+                                        }
+                                        else{
+                                            serialSendV("0");
+                                            active=false;
+                                        }
+
+
+                                    }
+
+                                });
+
+                            }
+                        }, 1000, 1000); // delay
+
+
+                        Toast.makeText(Visualization.this, "Left Insole Started.", Toast.LENGTH_SHORT).show();
+
+                    }
+                } else {
+                    Toast.makeText(Visualization.this, "Left Insole Not Connected!", Toast.LENGTH_SHORT).show();
+                }
+
+            }
                 // startBtn.setClickable(true);
 
 //                if (is_R_insole_connected) {
@@ -1512,7 +1745,6 @@ public class Visualization extends BlunoLibrary {
 //                } else {
 //                    Toast.makeText(Visualization.this, "Right Insole Not Connected!", Toast.LENGTH_SHORT).show();
 //                }
-            }
         });
 
         /*
@@ -1552,6 +1784,7 @@ public class Visualization extends BlunoLibrary {
 
         */
     }
+
 
 //    public void RightData(Map<String,Object>  data, String of_insole){
 //        handler.postDelayed(new Runnable() {
@@ -2125,6 +2358,44 @@ public class Visualization extends BlunoLibrary {
     public String onSerialReceivedV(String theString) {
         return null;
     }
+
+    private void writeData(Double[] list) {
+        Date today = new Date();
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
+
+        String currentDate = dateFormat.format(today);
+//
+        List<Double> left = new ArrayList<>(Arrays.asList(l_data_double_arr));
+//        List<Double> right = new ArrayList<>();
+
+//        Log.d(left.toString(), "writeData: left");
+//        Log.d(right.toString(), "writeData: right");
+
+//        System.out.println("left:"+left.toString());
+//        System.out.println("right:"+right.toString());
+
+        usersRef.child(currentDate).child("left").child(usersRef.push().getKey()).setValue(left.toString());
+//        usersRef.child(currentDate).child("right").setValue(right.toString());
+//        usersRef.child("left").setValue(left); // collected data(unique)
+//        usersRef.child("right").setValue(right); // collected data(unique)
+//        usersRef.child("date").setValue(dateFormat.format(today)); // collected data(unique)
+
+        // Add a new user with some data
+        // username_date_time
+        // --- left
+        // ------- getKey(): [0.0,.....,0.0]
+        // ------- getKey(): [0.0,.....,0.0]
+        // ------- getKey(): [0.0,.....,0.0]
+        // --- right
+
+        User newUser = new User("User", left, left);
+//        User newUser = new User("User", left, right);
+        // dateFormat
+//        usersRef.child("unser_"+dateFormat.format(today)).setValue(newUser); // collected data(unique)
+//        usersRef.child(usersRef.push().getKey()).setValue(newUser); // collected data(unique)
+    }
+
 }
 
 

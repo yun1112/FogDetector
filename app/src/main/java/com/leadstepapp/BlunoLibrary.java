@@ -35,12 +35,20 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
+import com.leadstepapp.bluetoothseriallibrary.BluetoothSerialDevice;
+
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
+
+import ca.hss.heatmaplib.HeatMap;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
 public abstract class BlunoLibrary extends AppCompatActivity {
 
@@ -203,6 +211,7 @@ public abstract class BlunoLibrary extends AppCompatActivity {
 	private ArrayAdapter<String> deviceID;
 	private Set<BluetoothDevice> pairedDevices;
 	private String choseID;
+	private com.leadstepapp.bluetoothseriallibrary.BluetoothManager bluetoothManager = com.leadstepapp.bluetoothseriallibrary.BluetoothManager.getInstance();
 
 	private Runnable mConnectingOverTimeRunnableL = new Runnable() {
 		@Override
@@ -290,6 +299,12 @@ public abstract class BlunoLibrary extends AppCompatActivity {
 		bindService(gattServiceIntent, mServiceConnectionL, Context.BIND_AUTO_CREATE);
 		bindService(gattServiceIntent, mServiceConnectionR, Context.BIND_AUTO_CREATE);
 		bindService(gattServiceIntent, mServiceConnectionV, Context.BIND_AUTO_CREATE);
+
+		if (bluetoothManager == null) {
+			// Bluetooth unavailable on this device :( tell the user
+			Toast.makeText(getApplication(), "Bluetooth not available.", Toast.LENGTH_LONG).show(); // Replace context with your context instance.
+			finish();
+		}
 
 		// Initializes list view adapter.
 		bleDeviceAdapterL = new BLEDeviceAdapter(mainContext);
@@ -498,14 +513,14 @@ public abstract class BlunoLibrary extends AppCompatActivity {
 //					return;
 			}
 			((Activity) mainContext).startActivityForResult(enableBtIntent, REQUEST_ENABLE_BTL);
-			showBTDList(mBluetoothAdapterL);
+//			showBTDList(mBluetoothAdapterL);
 		}
 
 		if (!mBluetoothAdapterR.isEnabled()) {
 			Intent enableBtIntent = new Intent(
 					BluetoothAdapter.ACTION_REQUEST_ENABLE);
 			((Activity) mainContext).startActivityForResult(enableBtIntent, REQUEST_ENABLE_BTR);
-			showBTDList(mBluetoothAdapterR);
+//			showBTDList(mBluetoothAdapterR);
 		}
 
 //		if (!mBluetoothAdapterV.isEnabled()) {
@@ -529,118 +544,138 @@ public abstract class BlunoLibrary extends AppCompatActivity {
 	public BluetoothAdapter getBluetoothAdapterR() {
 		return mBluetoothAdapterR;
 	}
-	public void showBTDList(BluetoothAdapter mBluetoothAdapter) {
-		if (ActivityCompat.checkSelfPermission(mainContext, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-			// TODO: Consider calling
-			//    ActivityCompat#requestPermissions
-			pairedDevices = mBluetoothAdapter.getBondedDevices();
-
-			final ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-					mainContext,
-					R.layout.bluetooth_list);
-
-			if (pairedDevices.size() > 0) {
-				for (BluetoothDevice device : pairedDevices) {
-					String str = "已配對完成的裝置有 " + device.getName() + " " + device.getAddress() + "\n";
-					uid = device.getAddress();
-					Log.d("selectBTDevice: ", str);
-					bleDevice = device;
-					deviceName.add(str);//將以配對的裝置名稱儲存，並顯示於LIST清單中
-					deviceID.add(uid); //好像沒用到
-					adapter.add(str);
-				}
-
-				chooseBTD(adapter);
-
-
-			}
-			return;
-		}
-
-	}
-
-	private void chooseBTD(ArrayAdapter<String> adapter) {
-		AlertDialog.Builder alertBuilder = new AlertDialog.Builder(
-				mainContext);
-		alertBuilder.setTitle("Choose to Bluetooth Device");
-
-		alertBuilder.setNegativeButton("Cancel",
-				new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog,
-										int which) {
-						dialog.dismiss();
-					}
-				});
-
-		alertBuilder.setAdapter(adapter,
-				new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog,
-										int id) {
-						System.out.println("device:"+deviceID);
-						System.out.println("id:"+id);
-						String strName = adapter.getItem(id);
-						choseID = deviceID.getItem(id);
-                        Toast.makeText(mainContext, "選擇了:" + choseID, Toast.LENGTH_SHORT).show();
-//						deviceName.clear();
+//	public void showBTDList(BluetoothAdapter mBluetoothAdapter) {
+//		if (ActivityCompat.checkSelfPermission(mainContext, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+//			// TODO: Consider calling
+//			//    ActivityCompat#requestPermissions
+//			pairedDevices = mBluetoothAdapter.getBondedDevices();
 //
-						try {
-							connectBT(choseID);
-						} catch (IOException e) {
-							throw new RuntimeException(e);
-						}
-					}
-				});
-		alertBuilder.show();
-	}
-
-	private void connectBT(String choseID) throws IOException {
-//		UUID uuid = UUID.fromString(_UUID); //藍芽模組UUID好像都是這樣
-
-		if (pairedDevices != null) {
-			for (BluetoothDevice device : pairedDevices) {
-				bleDevice = device;
-				System.out.println("device:"+device);
-
-				if (device.getAddress().equals(choseID))
-					break;
-			}
-		}
-
-		if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-			// TODO: Consider calling
-			//    ActivityCompat#requestPermissions
-//            return;
-		}
-
-//		bluesoccket = bleDevice.createRfcommSocketToServiceRecord(uuid); //使用被選擇的設備UUID建立連線
+//			final ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+//					mainContext,
+//					R.layout.bluetooth_list);
 //
-//		if (bleDevice != null) { //DeviceID != null // 如果有找到設備
-//			try {
-//				mBluetoothAdapter.cancelDiscovery();
-//				bluesoccket.connect();
+//			if (pairedDevices.size() > 0) {
+//				for (BluetoothDevice device : pairedDevices) {
+//					String str = "已配對完成的裝置有 " + device.getName() + " " + device.getAddress() + "\n";
+//					uid = device.getAddress();
+//					Log.d("selectBTDevice: ", str);
+//					bleDevice = device;
+//					deviceName.add(str);//將以配對的裝置名稱儲存，並顯示於LIST清單中
+//					deviceID.add(uid); //好像沒用到
+//					adapter.add(str);
+//				}
 //
-//				if(!bluesoccket.isConnected()) return;
-//				mmOuputStream = bluesoccket.getOutputStream();
-//				mmInputStream = bluesoccket.getInputStream();
-//				isChecked = true;
+//				chooseBTD(adapter);
 //
-//				beginListenForData();
 //
-//				textDevice.setText(bleDevice.getName());
-//				connectBtn.setText("DISCONNECT");
-//				connectBtn.setBackgroundResource(R.drawable.edit_round_black);
-//				Toast.makeText(myActivity, "Success to connect", Toast.LENGTH_SHORT).show();
-//			} catch (SocketException e) {
-//				Toast.makeText(myActivity, "Failed to connect", Toast.LENGTH_SHORT).show();
-//				bluesoccket.close();
-//			} catch (IOException e) {
-//				Toast.makeText(myActivity, "Failed to connect", Toast.LENGTH_SHORT).show();
-//				bluesoccket.close();
+//			}
+//			return;
+//		}
+//
+//	}
+//
+//	private void chooseBTD(ArrayAdapter<String> adapter) {
+//		AlertDialog.Builder alertBuilder = new AlertDialog.Builder(
+//				mainContext);
+//		alertBuilder.setTitle("Choose a Bluetooth Device");
+//
+//		alertBuilder.setNegativeButton("Cancel",
+//				new DialogInterface.OnClickListener() {
+//					public void onClick(DialogInterface dialog,
+//										int which) {
+//						dialog.dismiss();
+//					}
+//				});
+//
+//		alertBuilder.setAdapter(adapter,
+//				new DialogInterface.OnClickListener() {
+//					public void onClick(DialogInterface dialog,
+//										int id) {
+//						System.out.println("device:"+deviceID);
+//						System.out.println("id:"+id);
+//						String strName = adapter.getItem(id);
+//						choseID = deviceID.getItem(id);
+//                        Toast.makeText(mainContext, "選擇了:" + choseID, Toast.LENGTH_SHORT).show();
+////						deviceName.clear();
+////
+//						try {
+//							connectBT(choseID);
+//						} catch (IOException e) {
+//							throw new RuntimeException(e);
+//						}
+//					}
+//				});
+//		alertBuilder.show();
+//	}
+//
+//	public String getMAC() {
+//		return choseID;
+//	}
+//	private String connectBT(String choseID) throws IOException {
+////		UUID uuid = UUID.fromString(_UUID); //藍芽模組UUID好像都是這樣
+//
+//		if (pairedDevices != null) {
+//			for (BluetoothDevice device : pairedDevices) {
+//				bleDevice = device;
+//				System.out.println("connectBT device:"+device);
+//				connectDevice(String.valueOf(device));
+//				if (device.getAddress().equals(choseID))
+//					break;
 //			}
 //		}
+//
+//		if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+//			// TODO: Consider calling
+//			//    ActivityCompat#requestPermissions
+////            return;
+//		}
+//
+////		bluesoccket = bleDevice.createRfcommSocketToServiceRecord(uuid); //使用被選擇的設備UUID建立連線
+////
+////		if (bleDevice != null) { //DeviceID != null // 如果有找到設備
+////			try {
+////				mBluetoothAdapter.cancelDiscovery();
+////				bluesoccket.connect();
+////
+////				if(!bluesoccket.isConnected()) return;
+////				mmOuputStream = bluesoccket.getOutputStream();
+////				mmInputStream = bluesoccket.getInputStream();
+////				isChecked = true;
+////
+////				beginListenForData();
+////
+////				textDevice.setText(bleDevice.getName());
+////				connectBtn.setText("DISCONNECT");
+////				connectBtn.setBackgroundResource(R.drawable.edit_round_black);
+////				Toast.makeText(myActivity, "Success to connect", Toast.LENGTH_SHORT).show();
+////			} catch (SocketException e) {
+////				Toast.makeText(myActivity, "Failed to connect", Toast.LENGTH_SHORT).show();
+////				bluesoccket.close();
+////			} catch (IOException e) {
+////				Toast.makeText(myActivity, "Failed to connect", Toast.LENGTH_SHORT).show();
+////				bluesoccket.close();
+////			}
+////		}
+//		return choseID;
+//	}
+//	public void connectDevice(String mac) {
+//		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//			bluetoothManager.openSerialDevice(mac)
+//					.subscribeOn(Schedulers.io())
+//					.observeOn(AndroidSchedulers.mainThread())
+//					.subscribe(this::onConnected, this::onError);
+//		}
+//	}
 
+	private void onConnected(BluetoothSerialDevice connectedDevice) {
+		Log.d(TAG, "onConnected: ");
 	}
 
+	private void onError(Throwable error) {
+		// Handle the error
+		Log.d(String.valueOf(error), "onError: ");
+
+	}
 	private void disconnectBTD() throws IOException {
 //		bluesoccket.close();
 //		imgPM.setImageResource(R.drawable.bluetooth);
