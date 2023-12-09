@@ -1677,6 +1677,7 @@ public class Visualization extends BlunoLibrary {
                                     @Override
                                     public void run() {
 //                                        Log.d(Arrays.toString(l_data_double_arr), "@@@l_data_double_arr: ");
+                                        // 여기서 데이터 전송함
 
 //                                        String ListDataDicts = ListData.toString();
 //                                        Log.d("TAG", "onMessageReceived: " + LListDict.size());

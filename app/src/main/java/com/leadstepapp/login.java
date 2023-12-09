@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -42,8 +43,9 @@ public class login extends AppCompatActivity {
     Button startBtn;
     private DatabaseReference mDatabase;
     private Timer timer = new Timer();
-    DatabaseReference usersRef;
-
+    private DatabaseReference usersRef;
+    private String userName;
+    private String androidId;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,6 +59,7 @@ public class login extends AppCompatActivity {
 //        myRef.setValue("Hello, World!");
         // Get a reference to the database
         mDatabase = FirebaseDatabase.getInstance().getReference();
+        androidId = Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
 
         // Write data to the database
 //        writeData();
@@ -118,7 +121,7 @@ public class login extends AppCompatActivity {
             }
 
         });
-        usersRef = mDatabase.child("user"); // user name
+        usersRef = mDatabase.child(androidId+"_+"+userName); // user name
         startBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -133,6 +136,7 @@ public class login extends AppCompatActivity {
 //                extras.putString("DOCTOR_ID", DoctorID.getText().toString());
                 intent.putExtras(extras);
                 startActivity(intent);
+                userName = PatientN.getText().toString();
                 }
 
         });
@@ -237,6 +241,8 @@ public class login extends AppCompatActivity {
 
         usersRef.child(currentDate).child("left").setValue(left.toString());
         usersRef.child(currentDate).child("right").setValue(right.toString());
+
+
 //        usersRef.child("left").setValue(left); // collected data(unique)
 //        usersRef.child("right").setValue(right); // collected data(unique)
 //        usersRef.child("date").setValue(dateFormat.format(today)); // collected data(unique)
@@ -249,7 +255,7 @@ public class login extends AppCompatActivity {
         // ------- getKey(): [0.0,.....,0.0]
         // --- right
 
-        User newUser = new User("User", left, right);
+        User newUser = new User(userName, left, right);
         Log.d(String.valueOf(newUser.getLeft()), "newUser: ");
         // dateFormat
 //        usersRef.child("unser_"+dateFormat.format(today)).setValue(newUser); // collected data(unique)
