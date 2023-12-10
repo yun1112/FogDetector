@@ -21,6 +21,7 @@ import android.media.ToneGenerator;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
@@ -193,8 +194,8 @@ public class Visualization extends BlunoLibrary {
     private Timer timer = new Timer();
     private DatabaseReference usersRef;
 
-    private List<Double[]> LDataListPerSec = new ArrayList<>();
-    private List<Double[]> RDataListPerSec = new ArrayList<>();
+    private List<List> LDataListPerSec = new ArrayList<>();
+    private List<List> RDataListPerSec = new ArrayList<>();
 
     Timer gaitTimer = new Timer();
 
@@ -448,8 +449,8 @@ public class Visualization extends BlunoLibrary {
 //                            System.out.println("NON SENSOR INDEX:" + left_data_index + " "+ message);
                             left_data_index++;
 //                            writeData(l_data_double_arr, r_data_double_arr);
-//                            LDataListPerSec.add(l_data_double_arr);
-//                            System.out.println("L데이터: "+LDataListPerSec);
+//                            LDataListPerSec.add(Arrays.asList(l_data_double_arr));
+//                            System.out.println("L데이터: "+LDataListPerSec.toString());
 //
                         }
                     }
@@ -715,9 +716,9 @@ public class Visualization extends BlunoLibrary {
 //                                System.out.println("NON SENSOR INDEX:" + right_data_index + " "+ message);
                             right_data_index++;
 //                            writeData(l_data_double_arr, r_data_double_arr);
-//                            RDataListPerSec.add(r_data_double_arr);
-//                            System.out.println("R데이터: "+RDataListPerSec);
-
+//                            RDataListPerSec.add(Arrays.asList(r_data_double_arr));
+//                            System.out.println("R데이터: "+RDataListPerSec.toString());
+//
                         }
                     }
 
@@ -1771,33 +1772,31 @@ public class Visualization extends BlunoLibrary {
 //                }
 
                 Toast.makeText(Visualization.this, "Gait measurement started.", Toast.LENGTH_SHORT).show();
-
-
-//                Runnable timerThread = new Runnable() {
+//                CountDownTimer countDown = new CountDownTimer(10000, 1000) {
 //                    @Override
-//                    public void run() {
-//                        TimerTask task = new TimerTask() {
-//                            @Override
-//                            public void run() {
-//                                System.out.println("Task executed at: " + System.currentTimeMillis());
+//                    public void onTick(long millisUntilFinished) {
+//                        // milliseconds (1000 in 1 sec) - update text if at least 1s remaining.
+//                        if (millisUntilFinished > 1000) {
 //
-//                                System.out.println("1초마다 데이터 전송");
+////                    timer.setText(String.valueOf(millisUntilFinished/1000));
+//                            System.out.println("Task executed at: " + System.currentTimeMillis());
+//
+//                            System.out.println("1초마다 데이터 전송");
 ////                            System.out.println("LDataListPerSec: "+LDataListPerSec);
 ////                            System.out.println("RDataListPerSec: "+RDataListPerSec);
-////                                writeData(LDataListPerSec, RDataListPerSec);
-//                            }
-//                        };
+//                            writeData(LDataListPerSec, RDataListPerSec);
+//                        }
 //
-//                        gaitTimer.schedule(task, 1000, 1000); // 1000 milliseconds = 1 second
+//                    }
 //
+//                    @Override
+//                    public void onFinish() {
 //
 //                    }
 //                };
-//                timerThread.run();
+//
+//                countDown.start();
 
-//                if(is_L_insole_connected && is_L_insole_connected){ // click stop
-//                    gaitTimer.cancel();
-//                }
 
                 if (is_L_insole_connected) {
                     if (is_L_insole_started) {
@@ -2582,15 +2581,17 @@ public class Visualization extends BlunoLibrary {
         return null;
     }
 
-    private void writeData(List<Double[]> LArr, List<Double[]> RArr) {
+    private void writeData(List<List> LArr, List<List> RArr) {
         Date today = new Date();
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
 
         String currentDate = dateFormat.format(today);
 
-        usersRef.child(currentDate).child("left").child(usersRef.push().getKey()).setValue(LArr.toString());
-        usersRef.child(currentDate).child("right").child(usersRef.push().getKey()).setValue(RArr.toString());
+        usersRef.child(currentDate).child("left").setValue(LArr.toString());
+        usersRef.child(currentDate).child("right").setValue(RArr.toString());
+//        usersRef.child(currentDate).child("left").child(usersRef.push().getKey()).setValue(LArr.toString());
+//        usersRef.child(currentDate).child("right").child(usersRef.push().getKey()).setValue(RArr.toString());
 
 //        User newUser = new User("User", LList, RList);
     }
