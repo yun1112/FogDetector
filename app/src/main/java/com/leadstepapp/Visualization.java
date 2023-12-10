@@ -23,6 +23,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.view.View;
@@ -218,7 +219,7 @@ public class Visualization extends BlunoLibrary {
         Date date = new Date();
         Intent intent = getIntent();
         Bundle extras = intent.getExtras();
-        USER_NAME = extras.getString("USER_NAME");
+        USER_NAME = extras.getString("userName");
         PATIENT_ID = extras.getString("PATIENT_ID");
         DOCTOR_NAME = extras.getString("DOCTOR_NAME");
         DOCTOR_ID = extras.getString("DOCTOR_ID");
@@ -235,8 +236,9 @@ public class Visualization extends BlunoLibrary {
         Arrays.fill(l_data_double_arr, 0.0);
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
+        String androidId = Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
 
-        usersRef = mDatabase.child("user"); // user name
+        usersRef = mDatabase.child(androidId+"_"+USER_NAME); // user name
 
         if (bluetoothManager == null) {
             // Bluetooth unavailable on this device :( tell the user
@@ -362,11 +364,9 @@ public class Visualization extends BlunoLibrary {
                                 Toast.makeText(Visualization.this, "Device:" + choseID, Toast.LENGTH_SHORT).show();
                                 deviceName.clear();
 //
-                                try {
-                                    connectBT(choseID);
-                                } catch (IOException e) {
-                                    throw new RuntimeException(e);
-                                }
+                                //                                    connectBT(choseID);
+                                connectDevice(choseID);
+
                             }
                         });
                 alertBuilder.show();
@@ -413,7 +413,10 @@ public class Visualization extends BlunoLibrary {
 
                 is_L_insole_connected = true;
                 Toast.makeText(getApplication(), "Connected to Left Insole.", Toast.LENGTH_SHORT).show();
-
+                if(is_L_insole_connected && is_R_insole_connected) {
+                    startBtn.setBackgroundResource(R.drawable.rounded_corner);
+                    startBtn.setEnabled(true);
+                }
             }
 
             private void onMessageReceived(String message) {
@@ -438,9 +441,20 @@ public class Visualization extends BlunoLibrary {
                             l_data_double_arr[left_data_index] = Double.parseDouble(message);
 //                            System.out.println("NON SENSOR INDEX:" + left_data_index + " "+ message);
                             left_data_index++;
+//                            System.out.println("L데이터");
+                            writeData(l_data_double_arr, r_data_double_arr);
                         }
                     }
 
+                    // 1초마다 서버로 전송
+//                    TimerTask task = new TimerTask() {
+//                        @Override
+//                        public void run() {
+//                           
+//                        }
+//                    };
+//
+//                    new Timer().scheduleAtFixedRate(task, 0l, 1000);
 
                     if (left_data_len >= max_data_len + 15) {
                         heatMapLeft.clearData();
@@ -512,7 +526,9 @@ public class Visualization extends BlunoLibrary {
 //
 //                            Log.d(Arrays.toString(l_data_double_arr), "onMessageReceived l_data_double_arr: ");
 //                            if(count<89)
-//                                writeData(l_data_double_arr);
+////                                writeData(l_data_double_arr);
+//                                System.out.println("데이터");
+//                                writeData(l_data_double_arr, r_data_double_arr);
 //
 //                        }
 //                    });
@@ -569,6 +585,7 @@ public class Visualization extends BlunoLibrary {
 
                     if (pairedDevices.size() > 0) {
                         for (BluetoothDevice device : pairedDevices) {
+
                             String str = "已配對完成的裝置有 " + device.getName() + " " + device.getAddress() + "\n";
                             uid = device.getAddress();
                             Log.d("selectBTDevice: ", str);
@@ -611,11 +628,8 @@ public class Visualization extends BlunoLibrary {
                                 Toast.makeText(Visualization.this, "Device:" + choseID, Toast.LENGTH_SHORT).show();
                                 deviceName.clear();
 //
-                                try {
-                                    connectBT(choseID);
-                                } catch (IOException e) {
-                                    throw new RuntimeException(e);
-                                }
+                                //                                    connectBT(choseID);
+                                connectDevice(choseID);
                             }
                         });
                 alertBuilder.show();
@@ -628,8 +642,8 @@ public class Visualization extends BlunoLibrary {
                 if (pairedDevices != null) {
                     for (BluetoothDevice device : pairedDevices) {
                         bleDevice = device;
-                        System.out.println("connectBT device:"+device);
-                        System.out.println("connectBT device:"+device.getAddress());
+//                        System.out.println("connectBT device:"+device);
+//                        System.out.println("connectBT device:"+device.getAddress());
                         System.out.println("connectBT device:"+choseID);
                         connectDevice(choseID);
                         if (device.getAddress().equals(choseID))
@@ -644,15 +658,12 @@ public class Visualization extends BlunoLibrary {
             //            @SuppressLint("CheckResult")
             private void connectDevice(String mac) {
                 System.out.println("check mac:"+mac); // "20:17:12:04:19:37"
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    bluetoothManager.openSerialDevice("20:17:12:04:19:37") // R_insole_mac
-                            .subscribeOn(Schedulers.io())
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(this::onConnected, this::onError);
-                }
+                bluetoothManager.openSerialDevice(mac) // R_insole_mac
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(this::onConnected, this::onError);
             }
 
-            @RequiresApi(api = Build.VERSION_CODES.O)
             private void onConnected(BluetoothSerialDevice connectedDevice) {
                 System.out.println("??????? connected");
                 // You are now connected to this device!
@@ -665,6 +676,11 @@ public class Visualization extends BlunoLibrary {
 
                 is_R_insole_connected = true;
                 Toast.makeText(getApplication(), "Connected to Right Insole.", Toast.LENGTH_SHORT).show();
+
+                if(is_L_insole_connected && is_R_insole_connected) {
+                    startBtn.setBackgroundResource(R.drawable.rounded_corner);
+                    startBtn.setEnabled(true);
+                }
             }
 
             private void onMessageSent(String message) {
@@ -690,6 +706,8 @@ public class Visualization extends BlunoLibrary {
                             r_data_double_arr[right_data_index] = Double.parseDouble(message);
 //                                System.out.println("NON SENSOR INDEX:" + right_data_index + " "+ message);
                             right_data_index++;
+                            System.out.println("R데이터");
+                            writeData(l_data_double_arr, r_data_double_arr);
                         }
                     }
                     Log.d(Arrays.toString(r_data_double_arr), "r_data_double_arr: ");
@@ -1740,8 +1758,9 @@ public class Visualization extends BlunoLibrary {
             public void onClick(View view) {
                 if (!is_L_insole_connected || !is_L_insole_connected)
                     Toast.makeText(Visualization.this, "Connect both insoles.", Toast.LENGTH_SHORT).show();
-                startBtn.setBackgroundResource(R.drawable.rounded_corner);
-                startBtn.setEnabled(true);
+//                startBtn.setBackgroundResource(R.drawable.rounded_corner);
+//                startBtn.setEnabled(true);
+
                 Log.d(String.valueOf(is_L_insole_connected), "is_L_insole_connected: ");
 
                 if (is_L_insole_connected) {
@@ -1758,7 +1777,7 @@ public class Visualization extends BlunoLibrary {
                         is_L_insole_started = true;
                         startBtn.setText("Stop");
                         startBtn.setBackgroundResource(R.drawable.rounded_corner_gray);
-                        startBtn.setEnabled(false);
+//                        startBtn.setEnabled(false);
                         left_timer = new Timer(); // At this line a new Thread will be created
                         left_timer.scheduleAtFixedRate(new TimerTask() {
                             @Override
@@ -1770,8 +1789,7 @@ public class Visualization extends BlunoLibrary {
                                     public void run() {
 //                                        Log.d(Arrays.toString(l_data_double_arr), "@@@l_data_double_arr: ");
                                         // 여기서 데이터 전송함
-                                        System.out.println("데이터");
-                                        writeData(l_data_double_arr, r_data_double_arr);
+
 //                                        String ListDataDicts = ListData.toString();
 //                                        Log.d("TAG", "onMessageReceived: " + LListDict.size());
 
