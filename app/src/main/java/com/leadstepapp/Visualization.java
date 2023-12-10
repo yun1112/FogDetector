@@ -430,6 +430,10 @@ public class Visualization extends BlunoLibrary {
                     startBtn.setBackgroundResource(R.drawable.rounded_corner);
                     startBtn.setEnabled(true);
                 }
+
+                connectLeftBtn.setBackgroundResource(R.drawable.rounded_corner_gray);
+                connectLeftBtn.setEnabled(true);
+                connectLeftBtn.setText("DISCONNECT LEFT");
             }
 
             private void onMessageReceived(String message) {
@@ -722,6 +726,9 @@ public class Visualization extends BlunoLibrary {
                     startBtn.setBackgroundResource(R.drawable.rounded_corner);
                     startBtn.setEnabled(true);
                 }
+                connectRightBtn.setBackgroundResource(R.drawable.rounded_corner_gray);
+                connectRightBtn.setEnabled(true);
+                connectRightBtn.setText("DISCONNECT RIGHT");
             }
 
             private void onMessageSent(String message) {
@@ -1836,7 +1843,7 @@ public class Visualization extends BlunoLibrary {
                         System.out.println("l_data_double_arr: "+Arrays.toString(l_data_double_arr));
                         System.out.println("r_data_double_arr: "+Arrays.toString(r_data_double_arr));
 
-                        writeData2(LDataListPerSec, RDataListPerSec);
+//                        writeData2(LDataListPerSec, RDataListPerSec);
 
                         synchronized (LDataListPerSec) {
                             LDataListPerSec.clear();
