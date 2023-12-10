@@ -643,8 +643,9 @@ public class Visualization extends BlunoLibrary {
 
             //            @SuppressLint("CheckResult")
             private void connectDevice(String mac) {
+                System.out.println("check mac:"+mac); // "20:17:12:04:19:37"
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    bluetoothManager.openSerialDevice(mac)
+                    bluetoothManager.openSerialDevice("20:17:12:04:19:37") // R_insole_mac
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe(this::onConnected, this::onError);
@@ -653,6 +654,7 @@ public class Visualization extends BlunoLibrary {
 
             @RequiresApi(api = Build.VERSION_CODES.O)
             private void onConnected(BluetoothSerialDevice connectedDevice) {
+                System.out.println("??????? connected");
                 // You are now connected to this device!
                 // Here you may want to retain an instance to your device:
                 right_insole_device_interface = connectedDevice.toSimpleDeviceInterface();
@@ -735,6 +737,7 @@ public class Visualization extends BlunoLibrary {
             }
 
             private void onError(Throwable error) {
+                Log.e(TAG, "onError: ", error);
                 // Handle the error
             }
         });
@@ -1745,14 +1748,17 @@ public class Visualization extends BlunoLibrary {
                     if (is_L_insole_started) {
                         left_insole_device_interface.stopInsole();
                         is_L_insole_started = false;
-                        startBtn.setText("Start Left");
+                        startBtn.setText("Start");
                         left_timer.cancel();
+                        startBtn.setBackgroundResource(R.drawable.rounded_corner);
+                        startBtn.setEnabled(true);
 
                     } else {
                         left_insole_device_interface.startInsole();
                         is_L_insole_started = true;
-                        startBtn.setText("Stop Left");
-
+                        startBtn.setText("Stop");
+                        startBtn.setBackgroundResource(R.drawable.rounded_corner_gray);
+                        startBtn.setEnabled(false);
                         left_timer = new Timer(); // At this line a new Thread will be created
                         left_timer.scheduleAtFixedRate(new TimerTask() {
                             @Override
@@ -1764,7 +1770,8 @@ public class Visualization extends BlunoLibrary {
                                     public void run() {
 //                                        Log.d(Arrays.toString(l_data_double_arr), "@@@l_data_double_arr: ");
                                         // 여기서 데이터 전송함
-
+                                        System.out.println("데이터");
+                                        writeData(l_data_double_arr, r_data_double_arr);
 //                                        String ListDataDicts = ListData.toString();
 //                                        Log.d("TAG", "onMessageReceived: " + LListDict.size());
 
@@ -2497,14 +2504,15 @@ public class Visualization extends BlunoLibrary {
         return null;
     }
 
-    private void writeData(Double[] list) {
+    private void writeData(Double[] LArr, Double[] RArr) {
         Date today = new Date();
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
 
         String currentDate = dateFormat.format(today);
 //
-        List<Double> left = new ArrayList<>(Arrays.asList(l_data_double_arr));
+        List<Double> LList = new ArrayList<>(Arrays.asList(LArr));
+        List<Double> RList = new ArrayList<>(Arrays.asList(RArr));
 //        List<Double> right = new ArrayList<>();
 
 //        Log.d(left.toString(), "writeData: left");
@@ -2513,7 +2521,8 @@ public class Visualization extends BlunoLibrary {
 //        System.out.println("left:"+left.toString());
 //        System.out.println("right:"+right.toString());
 
-        usersRef.child(currentDate).child("left").child(usersRef.push().getKey()).setValue(left.toString());
+        usersRef.child(currentDate).child("left").child(usersRef.push().getKey()).setValue(LList.toString());
+        usersRef.child(currentDate).child("right").child(usersRef.push().getKey()).setValue(RList.toString());
 //        usersRef.child(currentDate).child("right").setValue(right.toString());
 //        usersRef.child("left").setValue(left); // collected data(unique)
 //        usersRef.child("right").setValue(right); // collected data(unique)
@@ -2527,7 +2536,7 @@ public class Visualization extends BlunoLibrary {
         // ------- getKey(): [0.0,.....,0.0]
         // --- right
 
-        User newUser = new User("User", left, left);
+        User newUser = new User("User", LList, RList);
 //        User newUser = new User("User", left, right);
         // dateFormat
 //        usersRef.child("unser_"+dateFormat.format(today)).setValue(newUser); // collected data(unique)
