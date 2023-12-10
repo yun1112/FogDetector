@@ -19,6 +19,7 @@ import android.content.res.AssetFileDescriptor;
 import android.media.AudioManager;
 import android.media.ToneGenerator;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -194,10 +195,12 @@ public class Visualization extends BlunoLibrary {
     private Timer timer = new Timer();
     private DatabaseReference usersRef;
 
-    private List<List> LDataListPerSec = new ArrayList<>();
-    private List<List> RDataListPerSec = new ArrayList<>();
+    private List<List<Double>> LDataListPerSec = Collections.synchronizedList(new ArrayList<>());
+    private List<List<Double>> RDataListPerSec = Collections.synchronizedList(new ArrayList<>());
 
     Timer gaitTimer = new Timer();
+
+    private TimerTask task;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -407,14 +410,17 @@ public class Visualization extends BlunoLibrary {
             }
 
             private void onConnected(BluetoothSerialDevice connectedDevice) {
-                // You are now connected to this device!
-                // Here you may want to retain an instance to your device:
                 Log.d(connectedDevice.getMac(), "onConnected: connectedDevice");
                 left_insole_device_interface = connectedDevice.toSimpleDeviceInterface();
-//                startBtn.setBackgroundResource(R.drawable.rounded_corner);
-//                startBtn.setEnabled(true);
+//
+//                Runnable timerThread = new Runnable() {
+//                    @Override
+//                    public void run() {
+//
+//                    }
+//                };
+//                timerThread.run();
 
-                // Listen to bluetooth events
                 left_insole_device_interface.setListeners(message -> onMessageReceived(message), this::onMessageSent, this::onError);
                 left_insole_device_interface.stopInsole();
 
@@ -428,6 +434,7 @@ public class Visualization extends BlunoLibrary {
 
             private void onMessageReceived(String message) {
 
+//                System.out.println("데이터받음");
                 //store incoming bytes temporarily
                 if (!is_L_insole_started) {
                     left_temp_bytes += message + " ";
@@ -443,48 +450,73 @@ public class Visualization extends BlunoLibrary {
 
                     left_data_len++;
                     if (left_data_len > 15) {
-                        left_sensor_data_count++;
-                        if (!non_sensor_indeces.contains(left_sensor_data_count)) {
-                            l_data_double_arr[left_data_index] = Double.parseDouble(message);
+
+                        Runnable timerThread = new Runnable() {
+                            @Override
+                            public void run() {
+                                left_sensor_data_count++;
+                                if (!non_sensor_indeces.contains(left_sensor_data_count)) {
+                                    l_data_double_arr[left_data_index] = Double.parseDouble(message);
 //                            System.out.println("NON SENSOR INDEX:" + left_data_index + " "+ message);
-                            left_data_index++;
+                                    left_data_index++;
+                                }
+//                                System.out.println("l_data_double_arr: "+l_data_double_arr);
 //                            writeData(l_data_double_arr, r_data_double_arr);
-//                            LDataListPerSec.add(Arrays.asList(l_data_double_arr));
-//                            System.out.println("L데이터: "+LDataListPerSec.toString());
-//
-                        }
-                    }
 
-                    // 1초마다 서버로 전송
-//                    TimerTask task = new TimerTask() {
-//                        @Override
-//                        public void run() {
-//                           
-//                        }
-//                    };
-//
-//                    new Timer().scheduleAtFixedRate(task, 0l, 1000);
+                                synchronized (LDataListPerSec) {
+                                    LDataListPerSec.add(Arrays.asList(l_data_double_arr));
+                                }
+//                                LDataListPerSec.add(l_data_double_arr);
+//                                System.out.println("L데이터: "+LDataListPerSec.toString());
 
-                    if (left_data_len >= max_data_len + 15) {
-                        heatMapLeft.clearData();
-                        for (int i = 0; i < x_L.length; i++) {
-                            HeatMap.DataPoint point = new HeatMap.DataPoint(x_L[i], y[i], l_data_double_arr[i]);
-                            heatMapLeft.addData(point);
-                            heatMapLeft.forceRefresh();
-                        }
-                        Date date = new Date();
+
+
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+
+                                        if (left_data_len >= max_data_len + 15) {
+                                            heatMapLeft.clearData();
+                                            for (int i = 0; i < x_L.length; i++) {
+                                                HeatMap.DataPoint point = new HeatMap.DataPoint(x_L[i], y[i], l_data_double_arr[i]);
+                                                heatMapLeft.addData(point);
+                                                heatMapLeft.forceRefresh();
+                                            }
+                                            Date date = new Date();
 //                        leftDataDict.put(String.valueOf(formatter.format(date)),Arrays.toString(l_data_double_arr));
 //                        LList.add(Arrays.toString(l_data_double_arr).replace("]", ""));
 //                        Log.d("TAG", "onMessageReceived: " + LList.size());
 //                        if (LList.size() == 1) {
 //                            LListDict.add(LList);
 //                        }
-                        left_package_count++;
-                        left_data_index = 0;
-                        left_sensor_data_count = 0;
-                        left_data_len = 0;
-                        is_L_insole_started = false;
+                                            left_package_count++;
+                                            left_data_index = 0;
+                                            left_sensor_data_count = 0;
+                                            left_data_len = 0;
+                                            is_L_insole_started = false;
+                                        }
+                                    }
+                                });
+
+                            }
+                        };
+                        timerThread.run();
+
+
                     }
+
+                    // 1초마다 서버로 전송
+//                    TimerTask task = new TimerTask() {
+//                        @Override
+//                        public void run() {
+//
+//                        }
+//                    };
+//
+//                    new Timer().scheduleAtFixedRate(task, 0l, 1000);
+
+
+
 
 //                    LList.add(Arrays.toString(l_data_double_arr).replace("]", ""));
 //                    if (LList.size() == 1){
@@ -710,16 +742,27 @@ public class Visualization extends BlunoLibrary {
                 if (is_R_insole_started) {
                     right_data_len++;
                     if (right_data_len > 15) {
-                        right_sensor_data_count++;
-                        if (!non_sensor_indeces.contains(right_sensor_data_count)) {
-                            r_data_double_arr[right_data_index] = Double.parseDouble(message);
+                        Runnable timerThread = new Runnable() {
+                            @Override
+                            public void run() {
+                                right_sensor_data_count++;
+                                if (!non_sensor_indeces.contains(right_sensor_data_count)) {
+                                    r_data_double_arr[right_data_index] = Double.parseDouble(message);
 //                                System.out.println("NON SENSOR INDEX:" + right_data_index + " "+ message);
-                            right_data_index++;
+                                    right_data_index++;
 //                            writeData(l_data_double_arr, r_data_double_arr);
-//                            RDataListPerSec.add(Arrays.asList(r_data_double_arr));
-//                            System.out.println("R데이터: "+RDataListPerSec.toString());
+
+                                    synchronized (LDataListPerSec) {
+                                        RDataListPerSec.add(Arrays.asList(r_data_double_arr));
+                                    }
+//                                    System.out.println("R데이터: "+RDataListPerSec.toString());
 //
-                        }
+                                }
+                            }
+                        };
+                        timerThread.run();
+
+
                     }
 
                     LList.add(Arrays.toString(l_data_double_arr).replace("]", ""));
@@ -739,16 +782,23 @@ public class Visualization extends BlunoLibrary {
                     }
 
                     //if the data length reach the max_data_length, release the buffer and invert the start flag
-                    if (right_data_len >= max_data_len + 15) {
-                        heatMapRight.clearData();
-                        for (int i = 0; i < x_R.length; i++) {
-                            HeatMap.DataPoint point = new HeatMap.DataPoint(x_R[i], y[i], r_data_double_arr[i]);
-                            heatMapRight.addData(point);
-                            heatMapRight.forceRefresh();
-                        }
-                        Log.d(r_data_double_arr.toString(), "r_data_double_arr: ");
 
-                        Date date = new Date();
+//                    ((Activity) mainContext).runOnUiThread(new Runnable() {
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            if (right_data_len >= max_data_len + 15) {
+                                heatMapRight.clearData();
+                                for (int i = 0; i < x_R.length; i++) {
+                                    HeatMap.DataPoint point = new HeatMap.DataPoint(x_R[i], y[i], r_data_double_arr[i]);
+                                    heatMapRight.addData(point);
+                                    heatMapRight.forceRefresh();
+                                }
+//                        Log.d(r_data_double_arr.toString(), "r_data_double_arr: ");
+
+                                Date date = new Date();
 //                            rightDataDict.put(String.valueOf(formatter.format(date)), Arrays.toString(r_data_double_arr));
 //                        String list = Arrays.toString(customers.toArray()).replace("[", "").replace("]", "");
 //                        RList.add(Arrays.toString(r_data_double_arr).replace("[", ""));
@@ -756,11 +806,15 @@ public class Visualization extends BlunoLibrary {
 //                            RListDict.add(RList);
 //                        }
 //                        Log.d("TAG", "onMessageReceived: " + RList);
-                        right_data_index = 0;
-                        right_sensor_data_count = 0;
-                        right_data_len = 0;
-                        is_R_insole_started = false;
-                    }
+                                right_data_index = 0;
+                                right_sensor_data_count = 0;
+                                right_data_len = 0;
+                                is_R_insole_started = false;
+                            }
+                        }
+                    });
+
+
                 }
             }
 
@@ -1772,110 +1826,104 @@ public class Visualization extends BlunoLibrary {
 //                }
 
                 Toast.makeText(Visualization.this, "Gait measurement started.", Toast.LENGTH_SHORT).show();
-//                CountDownTimer countDown = new CountDownTimer(10000, 1000) {
-//                    @Override
-//                    public void onTick(long millisUntilFinished) {
-//                        // milliseconds (1000 in 1 sec) - update text if at least 1s remaining.
-//                        if (millisUntilFinished > 1000) {
-//
-////                    timer.setText(String.valueOf(millisUntilFinished/1000));
-//                            System.out.println("Task executed at: " + System.currentTimeMillis());
-//
-//                            System.out.println("1초마다 데이터 전송");
-////                            System.out.println("LDataListPerSec: "+LDataListPerSec);
-////                            System.out.println("RDataListPerSec: "+RDataListPerSec);
-//                            writeData(LDataListPerSec, RDataListPerSec);
-//                        }
-//
-//                    }
-//
-//                    @Override
-//                    public void onFinish() {
-//
-//                    }
-//                };
-//
-//                countDown.start();
 
+                task = new TimerTask() {
+                    @Override
+                    public void run() {
+                        System.out.println("Task executed at: " + System.currentTimeMillis());
+
+                        System.out.println("1초마다 데이터 전송");
+                        System.out.println("l_data_double_arr: "+Arrays.toString(l_data_double_arr));
+                        System.out.println("r_data_double_arr: "+Arrays.toString(r_data_double_arr));
+
+                        writeData2(LDataListPerSec, RDataListPerSec);
+
+                        synchronized (LDataListPerSec) {
+                            LDataListPerSec.clear();
+                            RDataListPerSec.clear();
+                        }
+                    }
+                };
+                new Timer().scheduleAtFixedRate(task, 1000, 1000);
 
                 if (is_L_insole_connected) {
                     if (is_L_insole_started) {
                         left_insole_device_interface.stopInsole();
                         is_L_insole_started = false;
 //                        startBtn.setText("Start");
-                        left_timer.cancel();
+//                        left_timer.cancel();
 //                        startBtn.setBackgroundResource(R.drawable.rounded_corner);
                         startBtn.setEnabled(true);
-
+                        task.cancel();
                     } else {
                         left_insole_device_interface.startInsole();
                         is_L_insole_started = true;
                         startBtn.setBackgroundResource(R.drawable.rounded_corner);
                         startBtn.setEnabled(true);
 //                        left_timer = new Timer(); // At this line a new Thread will be created
-                        left_timer.scheduleAtFixedRate(new TimerTask() {
-                            @Override
-                            public void run() {
-                                //DO YOUR THINGS
-                                runOnUiThread(new Runnable() {
-
-                                    @Override
-                                    public void run() {
-//                                        Log.d(Arrays.toString(l_data_double_arr), "@@@l_data_double_arr: ");
-                                        // 여기서 1초마다 데이터 전송함
-
-//                                        writeData(l_data_double_arr, r_data_double_arr);
-//                                        String ListDataDicts = ListData.toString();
-//                                        Log.d("TAG", "onMessageReceived: " + LListDict.size());
-
-//                                        ListData.addAll(LListDict);
-//                                        ListData.addAll(RListDict);
-                                        String ListDataDicts = LListDict.toString();
-//                                        LeftData(ListDataDicts.replace("],", "];"), "Left_Insole");
+//                        left_timer.scheduleAtFixedRate(new TimerTask() {
+//                            @Override
+//                            public void run() {
+//                                //DO YOUR THINGS
+//                                runOnUiThread(new Runnable() {
 //
-//                                        Log.d(TAG, "jinkatama: " + ListDataDicts);
+//                                    @Override
+//                                    public void run() {
+////                                        Log.d(Arrays.toString(l_data_double_arr), "@@@l_data_double_arr: ");
+//                                        // 여기서 1초마다 데이터 전송함
 //
-//                                        ListData.clear();
-//                                        LListDict.clear();
-//                                        RListDict.clear();
-//                                        LList.clear();
-//                                        RList.clear();
-
-                                        int n_L=0;
-                                        int n_R=0;
-                                        for (int i = 0; i < 89; i++) {
-//                                            Log.d(Arrays.toString(l_data_double_arr), "l_data_double_arr: ");
-//                                            Log.d(Arrays.toString(r_data_double_arr), "r_data_double_arr: ");
-                                            if(l_data_double_arr[i]>r_data_double_arr[i]){
-                                                n_L=n_L+1;
-                                            }
-                                            else{
-                                                n_R=n_R+1;
-                                            }
-                                        }
-                                        if(n_L>n_R){
-                                            if (active == false){
-                                                active=true;
-                                                Log.d(TAG, "ucokbaba: " + "Pertama Nyala");
-                                                serialSendV("1");
-                                            } else {
-                                                Log.d(TAG, "ucokbaba: " + "Sudah Nyala");
-                                            }
-                                        } else if(n_L==n_R){
-                                            Log.d(TAG, "ucokbaba: " + "FOG");
-                                        }
-                                        else{
-                                            serialSendV("0");
-                                            active=false;
-                                        }
-
-
-                                    }
-
-                                });
-
-                            }
-                        }, 1000, 1000); // delay
+////                                        writeData(l_data_double_arr, r_data_double_arr);
+////                                        String ListDataDicts = ListData.toString();
+////                                        Log.d("TAG", "onMessageReceived: " + LListDict.size());
+//
+////                                        ListData.addAll(LListDict);
+////                                        ListData.addAll(RListDict);
+//                                        String ListDataDicts = LListDict.toString();
+////                                        LeftData(ListDataDicts.replace("],", "];"), "Left_Insole");
+////
+////                                        Log.d(TAG, "jinkatama: " + ListDataDicts);
+////
+////                                        ListData.clear();
+////                                        LListDict.clear();
+////                                        RListDict.clear();
+////                                        LList.clear();
+////                                        RList.clear();
+//
+//                                        int n_L=0;
+//                                        int n_R=0;
+//                                        for (int i = 0; i < 89; i++) {
+////                                            Log.d(Arrays.toString(l_data_double_arr), "l_data_double_arr: ");
+////                                            Log.d(Arrays.toString(r_data_double_arr), "r_data_double_arr: ");
+//                                            if(l_data_double_arr[i]>r_data_double_arr[i]){
+//                                                n_L=n_L+1;
+//                                            }
+//                                            else{
+//                                                n_R=n_R+1;
+//                                            }
+//                                        }
+//                                        if(n_L>n_R){
+//                                            if (active == false){
+//                                                active=true;
+//                                                Log.d(TAG, "ucokbaba: " + "Pertama Nyala");
+//                                                serialSendV("1");
+//                                            } else {
+//                                                Log.d(TAG, "ucokbaba: " + "Sudah Nyala");
+//                                            }
+//                                        } else if(n_L==n_R){
+//                                            Log.d(TAG, "ucokbaba: " + "FOG");
+//                                        }
+//                                        else{
+//                                            serialSendV("0");
+//                                            active=false;
+//                                        }
+//
+//
+//                                    }
+//
+//                                });
+//
+//                            }
+//                        }, 1000, 1000); // delay
 
 
 
@@ -1891,7 +1939,8 @@ public class Visualization extends BlunoLibrary {
                         is_R_insole_started = false;
                         startBtn.setText("Start");
                         startBtn.setBackgroundResource(R.drawable.rounded_corner);
-                        right_timer.cancel();
+//                        right_timer.cancel();
+                        task.cancel();
                     } else {
                         startBtn.setText("Stop");
                         startBtn.setBackgroundResource(R.drawable.rounded_corner_gray);
@@ -2581,7 +2630,22 @@ public class Visualization extends BlunoLibrary {
         return null;
     }
 
-    private void writeData(List<List> LArr, List<List> RArr) {
+    private void writeData(Double[] LArr, Double[] RArr) {
+        Date today = new Date();
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
+
+        String currentDate = dateFormat.format(today);
+
+        usersRef.child(currentDate).child("left").setValue(Arrays.toString(LArr));
+        usersRef.child(currentDate).child("right").setValue(Arrays.toString(RArr));
+//        usersRef.child(currentDate).child("left").child(usersRef.push().getKey()).setValue(LArr.toString());
+//        usersRef.child(currentDate).child("right").child(usersRef.push().getKey()).setValue(RArr.toString());
+
+//        User newUser = new User("User", LList, RList);
+    }
+
+    private void writeData2(List<List<Double>> LArr, List<List<Double>> RArr) {
         Date today = new Date();
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
