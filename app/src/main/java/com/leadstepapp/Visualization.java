@@ -191,7 +191,13 @@ public class Visualization extends BlunoLibrary {
     private String choseID;
     private DatabaseReference mDatabase;
     private Timer timer = new Timer();
-    DatabaseReference usersRef;
+    private DatabaseReference usersRef;
+
+    private List<Double[]> LDataListPerSec = new ArrayList<>();
+    private List<Double[]> RDataListPerSec = new ArrayList<>();
+
+    Timer gaitTimer = new Timer();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -441,8 +447,10 @@ public class Visualization extends BlunoLibrary {
                             l_data_double_arr[left_data_index] = Double.parseDouble(message);
 //                            System.out.println("NON SENSOR INDEX:" + left_data_index + " "+ message);
                             left_data_index++;
-//                            System.out.println("L데이터");
-                            writeData(l_data_double_arr, r_data_double_arr);
+//                            writeData(l_data_double_arr, r_data_double_arr);
+//                            LDataListPerSec.add(l_data_double_arr);
+//                            System.out.println("L데이터: "+LDataListPerSec);
+//
                         }
                     }
 
@@ -706,15 +714,16 @@ public class Visualization extends BlunoLibrary {
                             r_data_double_arr[right_data_index] = Double.parseDouble(message);
 //                                System.out.println("NON SENSOR INDEX:" + right_data_index + " "+ message);
                             right_data_index++;
-                            System.out.println("R데이터");
-                            writeData(l_data_double_arr, r_data_double_arr);
+//                            writeData(l_data_double_arr, r_data_double_arr);
+//                            RDataListPerSec.add(r_data_double_arr);
+//                            System.out.println("R데이터: "+RDataListPerSec);
+
                         }
                     }
-                    Log.d(Arrays.toString(r_data_double_arr), "r_data_double_arr: ");
 
                     LList.add(Arrays.toString(l_data_double_arr).replace("]", ""));
                     RList.add(Arrays.toString(r_data_double_arr).replace("[", ""));
-                    Log.d(RList.toString(), "RList: ");
+//                    Log.d(RList.toString(), "RList: ");
 
                     if (RList.size()== 1 && LList.size() == 1){
                         ListData.addAll(Collections.singleton(LList.get(0)));
@@ -1756,29 +1765,55 @@ public class Visualization extends BlunoLibrary {
         startBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!is_L_insole_connected || !is_L_insole_connected)
-                    Toast.makeText(Visualization.this, "Connect both insoles.", Toast.LENGTH_SHORT).show();
-//                startBtn.setBackgroundResource(R.drawable.rounded_corner);
-//                startBtn.setEnabled(true);
+//                if (!is_L_insole_connected || !is_R_insole_connected){
+//                    Toast.makeText(Visualization.this, "Connect both insoles.", Toast.LENGTH_SHORT).show();
+//                    return;
+//                }
 
-                Log.d(String.valueOf(is_L_insole_connected), "is_L_insole_connected: ");
+                Toast.makeText(Visualization.this, "Gait measurement started.", Toast.LENGTH_SHORT).show();
+
+
+//                Runnable timerThread = new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        TimerTask task = new TimerTask() {
+//                            @Override
+//                            public void run() {
+//                                System.out.println("Task executed at: " + System.currentTimeMillis());
+//
+//                                System.out.println("1초마다 데이터 전송");
+////                            System.out.println("LDataListPerSec: "+LDataListPerSec);
+////                            System.out.println("RDataListPerSec: "+RDataListPerSec);
+////                                writeData(LDataListPerSec, RDataListPerSec);
+//                            }
+//                        };
+//
+//                        gaitTimer.schedule(task, 1000, 1000); // 1000 milliseconds = 1 second
+//
+//
+//                    }
+//                };
+//                timerThread.run();
+
+//                if(is_L_insole_connected && is_L_insole_connected){ // click stop
+//                    gaitTimer.cancel();
+//                }
 
                 if (is_L_insole_connected) {
                     if (is_L_insole_started) {
                         left_insole_device_interface.stopInsole();
                         is_L_insole_started = false;
-                        startBtn.setText("Start");
+//                        startBtn.setText("Start");
                         left_timer.cancel();
-                        startBtn.setBackgroundResource(R.drawable.rounded_corner);
+//                        startBtn.setBackgroundResource(R.drawable.rounded_corner);
                         startBtn.setEnabled(true);
 
                     } else {
                         left_insole_device_interface.startInsole();
                         is_L_insole_started = true;
-                        startBtn.setText("Stop");
-                        startBtn.setBackgroundResource(R.drawable.rounded_corner_gray);
-//                        startBtn.setEnabled(false);
-                        left_timer = new Timer(); // At this line a new Thread will be created
+                        startBtn.setBackgroundResource(R.drawable.rounded_corner);
+                        startBtn.setEnabled(true);
+//                        left_timer = new Timer(); // At this line a new Thread will be created
                         left_timer.scheduleAtFixedRate(new TimerTask() {
                             @Override
                             public void run() {
@@ -1788,8 +1823,9 @@ public class Visualization extends BlunoLibrary {
                                     @Override
                                     public void run() {
 //                                        Log.d(Arrays.toString(l_data_double_arr), "@@@l_data_double_arr: ");
-                                        // 여기서 데이터 전송함
+                                        // 여기서 1초마다 데이터 전송함
 
+//                                        writeData(l_data_double_arr, r_data_double_arr);
 //                                        String ListDataDicts = ListData.toString();
 //                                        Log.d("TAG", "onMessageReceived: " + LListDict.size());
 
@@ -1843,7 +1879,6 @@ public class Visualization extends BlunoLibrary {
                         }, 1000, 1000); // delay
 
 
-                        Toast.makeText(Visualization.this, "Left Insole Started.", Toast.LENGTH_SHORT).show();
 
                     }
                 }
@@ -1855,23 +1890,25 @@ public class Visualization extends BlunoLibrary {
                     if (is_R_insole_started) {
                         right_insole_device_interface.stopInsole();
                         is_R_insole_started = false;
-                        startRightBtn.setText("Start Right");
+                        startBtn.setText("Start");
+                        startBtn.setBackgroundResource(R.drawable.rounded_corner);
                         right_timer.cancel();
                     } else {
+                        startBtn.setText("Stop");
+                        startBtn.setBackgroundResource(R.drawable.rounded_corner_gray);
                         right_insole_device_interface.startInsole();
                         is_R_insole_started = true;
-                        right_timer.scheduleAtFixedRate(new TimerTask() {
-                            @Override
-                            public void run() {
-//                                sendToFirebase(rightDataDict,"Right_insole");
-//                                Log.d(TAG, "jinkatama: " + RListDict.size());
-//                                RListDict.clear();
-//                                RList.clear();
-//                                Log.d(TAG, "jinkatama: " + RListDict.size());
-                            }
-                        }, 1000, 1000);
+//                        right_timer.scheduleAtFixedRate(new TimerTask() {
+//                            @Override
+//                            public void run() {
+////                                sendToFirebase(rightDataDict,"Right_insole");
+////                                Log.d(TAG, "jinkatama: " + RListDict.size());
+////                                RListDict.clear();
+////                                RList.clear();
+////                                Log.d(TAG, "jinkatama: " + RListDict.size());
+//                            }
+//                        }, 1000, 1000);
 //                        startRightBtn.setText("Stop Right");
-                        Toast.makeText(Visualization.this, "Right Insole Started.", Toast.LENGTH_SHORT).show();
 
                     }
                 }
@@ -1879,7 +1916,30 @@ public class Visualization extends BlunoLibrary {
 //                    Toast.makeText(Visualization.this, "Right Insole Not Connected!", Toast.LENGTH_SHORT).show();
 //                }
 
-            }
+//
+//
+//                Runnable timerThread = new Runnable() {
+//                    @Override
+//                    public void run() {
+                        // 측정 타이머
+//                if(is_L_insole_started && is_R_insole_started) {
+
+                    // Sleep for a while to allow scheduled tasks to run (in a real application, this wouldn't be necessary)
+//                    try {
+//                        Thread.sleep(10000); // Sleep for 10 seconds
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    }
+                }
+//                else {
+//                    gaitTimer.cancel();
+//                }
+//
+////                    }
+////                };
+////                timerThread.run();
+//
+//            }
                 // startBtn.setClickable(true);
 
 //                if (is_R_insole_connected) {
@@ -2522,43 +2582,17 @@ public class Visualization extends BlunoLibrary {
         return null;
     }
 
-    private void writeData(Double[] LArr, Double[] RArr) {
+    private void writeData(List<Double[]> LArr, List<Double[]> RArr) {
         Date today = new Date();
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
 
         String currentDate = dateFormat.format(today);
-//
-        List<Double> LList = new ArrayList<>(Arrays.asList(LArr));
-        List<Double> RList = new ArrayList<>(Arrays.asList(RArr));
-//        List<Double> right = new ArrayList<>();
 
-//        Log.d(left.toString(), "writeData: left");
-//        Log.d(right.toString(), "writeData: right");
+        usersRef.child(currentDate).child("left").child(usersRef.push().getKey()).setValue(LArr.toString());
+        usersRef.child(currentDate).child("right").child(usersRef.push().getKey()).setValue(RArr.toString());
 
-//        System.out.println("left:"+left.toString());
-//        System.out.println("right:"+right.toString());
-
-        usersRef.child(currentDate).child("left").child(usersRef.push().getKey()).setValue(LList.toString());
-        usersRef.child(currentDate).child("right").child(usersRef.push().getKey()).setValue(RList.toString());
-//        usersRef.child(currentDate).child("right").setValue(right.toString());
-//        usersRef.child("left").setValue(left); // collected data(unique)
-//        usersRef.child("right").setValue(right); // collected data(unique)
-//        usersRef.child("date").setValue(dateFormat.format(today)); // collected data(unique)
-
-        // Add a new user with some data
-        // username_date_time
-        // --- left
-        // ------- getKey(): [0.0,.....,0.0]
-        // ------- getKey(): [0.0,.....,0.0]
-        // ------- getKey(): [0.0,.....,0.0]
-        // --- right
-
-        User newUser = new User("User", LList, RList);
-//        User newUser = new User("User", left, right);
-        // dateFormat
-//        usersRef.child("unser_"+dateFormat.format(today)).setValue(newUser); // collected data(unique)
-//        usersRef.child(usersRef.push().getKey()).setValue(newUser); // collected data(unique)
+//        User newUser = new User("User", LList, RList);
     }
 
 }

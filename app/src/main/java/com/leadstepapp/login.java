@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.provider.Settings;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -50,6 +51,32 @@ public class login extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        System.out.println("LOGIN");
+
+        CountDownTimer countDown = new CountDownTimer(10000, 1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                // milliseconds (1000 in 1 sec) - update text if at least 1s remaining.
+                if (millisUntilFinished > 1000) {
+
+//                    timer.setText(String.valueOf(millisUntilFinished/1000));
+                    System.out.println("Task executed at: " + System.currentTimeMillis());
+
+                    System.out.println("1초마다 데이터 전송");
+//                            System.out.println("LDataListPerSec: "+LDataListPerSec);
+//                            System.out.println("RDataListPerSec: "+RDataListPerSec);
+//                                writeData(LDataListPerSec, RDataListPerSec);
+                }
+
+            }
+
+            @Override
+            public void onFinish() {
+
+            }
+        };
+
+        countDown.start();
 
         // DB test
         // Write a message to the database
