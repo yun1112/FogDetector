@@ -99,7 +99,7 @@ public class Visualization extends BlunoLibrary {
     private String R_insole_mac = "20:17:12:04:19:37";
     private String start_bytes = "0 254 128";
     private String left_data, right_data, left_temp_bytes, right_temp_bytes;
-    private String PATIENT_NAME, PATIENT_ID, DOCTOR_NAME, DOCTOR_ID;
+    private String USER_NAME, PATIENT_ID, DOCTOR_NAME, DOCTOR_ID;
     private boolean is_L_insole_started = false;
     private boolean is_R_insole_started = false;
     private boolean is_L_insole_connected = false;
@@ -218,11 +218,11 @@ public class Visualization extends BlunoLibrary {
         Date date = new Date();
         Intent intent = getIntent();
         Bundle extras = intent.getExtras();
-        PATIENT_NAME = extras.getString("PATIENT_NAME");
+        USER_NAME = extras.getString("USER_NAME");
         PATIENT_ID = extras.getString("PATIENT_ID");
         DOCTOR_NAME = extras.getString("DOCTOR_NAME");
         DOCTOR_ID = extras.getString("DOCTOR_ID");
-        patientRecord.put("PATIENT_NAME", PATIENT_NAME);
+        patientRecord.put("USER_NAME", USER_NAME);
         patientRecord.put("PATIENT_ID", PATIENT_ID);
         patientRecord.put("DOCTOR_NAME", DOCTOR_NAME);
         patientRecord.put("DOCTOR_ID", DOCTOR_ID);
@@ -255,7 +255,7 @@ public class Visualization extends BlunoLibrary {
 
         text = (TextView) findViewById(R.id.t1);
         userName = (TextView) findViewById(R.id.user_name);
-        userName.setText(PATIENT_NAME);
+        userName.setText(USER_NAME);
 
         heatMapRight = (HeatMap) findViewById(R.id.heatmapRight);
         heatMapLeft = (HeatMap) findViewById(R.id.heatmapLeft);
@@ -393,7 +393,6 @@ public class Visualization extends BlunoLibrary {
 
 
             public void connectDevice(String mac) {
-                Log.d(mac, "connectDevice mac!!: ");
                 bluetoothManager.openSerialDevice(mac)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
@@ -405,8 +404,8 @@ public class Visualization extends BlunoLibrary {
                 // Here you may want to retain an instance to your device:
                 Log.d(connectedDevice.getMac(), "onConnected: connectedDevice");
                 left_insole_device_interface = connectedDevice.toSimpleDeviceInterface();
-                startBtn.setBackgroundResource(R.drawable.rounded_corner);
-                startBtn.setEnabled(true);
+//                startBtn.setBackgroundResource(R.drawable.rounded_corner);
+//                startBtn.setEnabled(true);
 
                 // Listen to bluetooth events
                 left_insole_device_interface.setListeners(message -> onMessageReceived(message), this::onMessageSent, this::onError);
@@ -538,11 +537,12 @@ public class Visualization extends BlunoLibrary {
             public void onClick(View v) {
                 Log.d(String.valueOf(is_R_insole_connected), "is_R_insole_connected: ");
                 Log.d(String.valueOf(isCheckedR), "isChecked: ");
-                Log.d(String.valueOf(R_insole_mac), "R_insole_mac: ");
 //                showBTDList(getBluetoothAdapterR());
 
-                if (isCheckedR) {
-                    connectDevice(R_insole_mac);
+                if (!isCheckedR) {
+                    showBTDList(getBluetoothAdapterR());
+
+//                    connectDevice(R_insole_mac);
 
                 } else {
                     if (is_R_insole_connected) {
@@ -557,8 +557,91 @@ public class Visualization extends BlunoLibrary {
                     }
                 }
             }
+            public void showBTDList(BluetoothAdapter mBluetoothAdapter) {
+                if (ActivityCompat.checkSelfPermission(Visualization.this, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                    // TODO: Consider calling
+                    //    ActivityCompat#requestPermissions
+                    pairedDevices = mBluetoothAdapter.getBondedDevices();
 
-//            @SuppressLint("CheckResult")
+                    final ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+                            Visualization.this,
+                            R.layout.bluetooth_list);
+
+                    if (pairedDevices.size() > 0) {
+                        for (BluetoothDevice device : pairedDevices) {
+                            String str = "已配對完成的裝置有 " + device.getName() + " " + device.getAddress() + "\n";
+                            uid = device.getAddress();
+                            Log.d("selectBTDevice: ", str);
+                            bleDevice = device;
+                            deviceName.add(str);//將以配對的裝置名稱儲存，並顯示於LIST清單中
+                            deviceID.add(uid); //好像沒用到
+                            adapter.add(str);
+                        }
+
+                        chooseBTD(adapter);
+
+
+                    }
+                    return;
+                }
+
+            }
+
+            private void chooseBTD(ArrayAdapter<String> adapter) {
+                AlertDialog.Builder alertBuilder = new AlertDialog.Builder(
+                        Visualization.this);
+                alertBuilder.setTitle("Choose a Bluetooth Device");
+
+                alertBuilder.setNegativeButton("Cancel",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog,
+                                                int which) {
+                                dialog.dismiss();
+                            }
+                        });
+
+                alertBuilder.setAdapter(adapter,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog,
+                                                int id) {
+                                System.out.println("device:"+deviceID);
+                                System.out.println("id:"+id);
+                                String strName = adapter.getItem(id);
+                                choseID = deviceID.getItem(id);
+                                Toast.makeText(Visualization.this, "Device:" + choseID, Toast.LENGTH_SHORT).show();
+                                deviceName.clear();
+//
+                                try {
+                                    connectBT(choseID);
+                                } catch (IOException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                        });
+                alertBuilder.show();
+            }
+
+
+            private String connectBT(String choseID) throws IOException {
+//		UUID uuid = UUID.fromString(_UUID); //藍芽模組UUID好像都是這樣
+
+                if (pairedDevices != null) {
+                    for (BluetoothDevice device : pairedDevices) {
+                        bleDevice = device;
+                        System.out.println("connectBT device:"+device);
+                        System.out.println("connectBT device:"+device.getAddress());
+                        System.out.println("connectBT device:"+choseID);
+                        connectDevice(choseID);
+                        if (device.getAddress().equals(choseID))
+                            break;
+                    }
+                }
+
+                return choseID;
+            }
+
+
+            //            @SuppressLint("CheckResult")
             private void connectDevice(String mac) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     bluetoothManager.openSerialDevice(mac)
@@ -1652,7 +1735,10 @@ public class Visualization extends BlunoLibrary {
         startBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                if (!is_L_insole_connected || !is_L_insole_connected)
+                    Toast.makeText(Visualization.this, "Connect both insoles.", Toast.LENGTH_SHORT).show();
+                startBtn.setBackgroundResource(R.drawable.rounded_corner);
+                startBtn.setEnabled(true);
                 Log.d(String.valueOf(is_L_insole_connected), "is_L_insole_connected: ");
 
                 if (is_L_insole_connected) {
@@ -1735,9 +1821,38 @@ public class Visualization extends BlunoLibrary {
                         Toast.makeText(Visualization.this, "Left Insole Started.", Toast.LENGTH_SHORT).show();
 
                     }
-                } else {
-                    Toast.makeText(Visualization.this, "Left Insole Not Connected!", Toast.LENGTH_SHORT).show();
                 }
+//                else {
+//                    Toast.makeText(Visualization.this, "Left Insole Not Connected!", Toast.LENGTH_SHORT).show();
+//                }
+
+                if (is_R_insole_connected) {
+                    if (is_R_insole_started) {
+                        right_insole_device_interface.stopInsole();
+                        is_R_insole_started = false;
+                        startRightBtn.setText("Start Right");
+                        right_timer.cancel();
+                    } else {
+                        right_insole_device_interface.startInsole();
+                        is_R_insole_started = true;
+                        right_timer.scheduleAtFixedRate(new TimerTask() {
+                            @Override
+                            public void run() {
+//                                sendToFirebase(rightDataDict,"Right_insole");
+//                                Log.d(TAG, "jinkatama: " + RListDict.size());
+//                                RListDict.clear();
+//                                RList.clear();
+//                                Log.d(TAG, "jinkatama: " + RListDict.size());
+                            }
+                        }, 1000, 1000);
+//                        startRightBtn.setText("Stop Right");
+                        Toast.makeText(Visualization.this, "Right Insole Started.", Toast.LENGTH_SHORT).show();
+
+                    }
+                }
+//                else {
+//                    Toast.makeText(Visualization.this, "Right Insole Not Connected!", Toast.LENGTH_SHORT).show();
+//                }
 
             }
                 // startBtn.setClickable(true);

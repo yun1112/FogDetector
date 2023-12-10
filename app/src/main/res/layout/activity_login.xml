@@ -79,7 +79,7 @@
 <!--                        android:textStyle="bold" />-->
 
                     <EditText
-                        android:id="@+id/patient_name"
+                        android:id="@+id/USER_NAME"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_centerVertical="true"

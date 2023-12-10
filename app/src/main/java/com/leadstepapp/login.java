@@ -89,7 +89,7 @@ public class login extends AppCompatActivity {
             }
         }
 
-        PatientN = findViewById(R.id.patient_name);
+        PatientN = findViewById(R.id.USER_NAME);
 //        PatientID = findViewById(R.id.patient_id);
 //        DoctorN = findViewById(R.id.doctor_name);
 //        DoctorID = findViewById(R.id.doctor_id);
@@ -130,7 +130,7 @@ public class login extends AppCompatActivity {
                 Toast.makeText(login.this, "Login successfully", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(getApplicationContext(), Visualization.class);
                 Bundle extras = new Bundle();
-                extras.putString("PATIENT_NAME", PatientN.getText().toString());
+                extras.putString("USER_NAME", PatientN.getText().toString());
 //                extras.putString("PATIENT_ID", PatientID.getText().toString());
 //                extras.putString("DOCTOR_NAME", DoctorN.getText().toString());
 //                extras.putString("DOCTOR_ID", DoctorID.getText().toString());
