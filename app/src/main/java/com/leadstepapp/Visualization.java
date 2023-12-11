@@ -195,8 +195,8 @@ public class Visualization extends BlunoLibrary {
     private Timer timer = new Timer();
     private DatabaseReference usersRef;
 
-    private List<List<Double>> LDataListPerSec = Collections.synchronizedList(new ArrayList<>());
-    private List<List<Double>> RDataListPerSec = Collections.synchronizedList(new ArrayList<>());
+    private List<Double[]> LDataListPerSec = Collections.synchronizedList(new ArrayList<>());
+    private List<Double[]> RDataListPerSec = Collections.synchronizedList(new ArrayList<>());
 
     Timer gaitTimer = new Timer();
 
@@ -464,7 +464,7 @@ public class Visualization extends BlunoLibrary {
 //                            writeData(l_data_double_arr, r_data_double_arr);
 
                                 synchronized (LDataListPerSec) {
-                                    LDataListPerSec.add(Arrays.asList(l_data_double_arr));
+                                    LDataListPerSec.add(l_data_double_arr);
                                 }
 //                                LDataListPerSec.add(l_data_double_arr);
 //                                System.out.println("L데이터: "+LDataListPerSec.toString());
@@ -753,7 +753,7 @@ public class Visualization extends BlunoLibrary {
 //                            writeData(l_data_double_arr, r_data_double_arr);
 
                                     synchronized (LDataListPerSec) {
-                                        RDataListPerSec.add(Arrays.asList(r_data_double_arr));
+                                        RDataListPerSec.add(r_data_double_arr);
                                     }
 //                                    System.out.println("R데이터: "+RDataListPerSec.toString());
 //
@@ -1836,7 +1836,7 @@ public class Visualization extends BlunoLibrary {
                         System.out.println("l_data_double_arr: "+Arrays.toString(l_data_double_arr));
                         System.out.println("r_data_double_arr: "+Arrays.toString(r_data_double_arr));
 
-                        writeData2(LDataListPerSec, RDataListPerSec);
+//                        writeData2(LDataListPerSec, RDataListPerSec);
 
                         synchronized (LDataListPerSec) {
                             LDataListPerSec.clear();
@@ -2645,7 +2645,7 @@ public class Visualization extends BlunoLibrary {
 //        User newUser = new User("User", LList, RList);
     }
 
-    private void writeData2(List<List<Double>> LArr, List<List<Double>> RArr) {
+    private void writeData2(List<Double[]> LArr, List<Double[]> RArr) {
         Date today = new Date();
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
