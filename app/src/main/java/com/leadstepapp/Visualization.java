@@ -197,10 +197,10 @@ public class Visualization extends BlunoLibrary {
 
     private List<List<Double>> LDataListPerSec = Collections.synchronizedList(new ArrayList<>());
     private List<List<Double>> RDataListPerSec = Collections.synchronizedList(new ArrayList<>());
-
     Timer gaitTimer = new Timer();
-
     private TimerTask task;
+    private Boolean hasReceivedLData = false;
+    private Boolean hasReceivedRData = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -437,7 +437,7 @@ public class Visualization extends BlunoLibrary {
             }
 
             private void onMessageReceived(String message) {
-
+                hasReceivedLData = true;
 //                System.out.println("데이터받음");
                 //store incoming bytes temporarily
                 if (!is_L_insole_started) {
@@ -469,6 +469,8 @@ public class Visualization extends BlunoLibrary {
 
                                 synchronized (LDataListPerSec) {
                                     LDataListPerSec.add(Arrays.asList(l_data_double_arr));
+                                    if(!hasReceivedRData)
+                                        r_data_double_arr[r_data_double_arr.length-1] = 0.0;
                                 }
 //                                LDataListPerSec.add(l_data_double_arr);
 //                                System.out.println("L데이터: "+LDataListPerSec.toString());
@@ -736,6 +738,7 @@ public class Visualization extends BlunoLibrary {
             }
 
             private void onMessageReceived(String message) {
+                hasReceivedRData = true;
                 //store incoming bytes temporarily
                 if (!is_R_insole_started) {
                     right_temp_bytes += message + " ";
@@ -761,6 +764,8 @@ public class Visualization extends BlunoLibrary {
 
                                     synchronized (LDataListPerSec) {
                                         RDataListPerSec.add(Arrays.asList(r_data_double_arr));
+                                        if(!hasReceivedLData)
+                                            l_data_double_arr[l_data_double_arr.length-1] = 0.0;
                                     }
 //                                    System.out.println("R데이터: "+RDataListPerSec.toString());
 //
@@ -1843,7 +1848,7 @@ public class Visualization extends BlunoLibrary {
                         System.out.println("l_data_double_arr: "+Arrays.toString(l_data_double_arr));
                         System.out.println("r_data_double_arr: "+Arrays.toString(r_data_double_arr));
 
-//                        writeData2(LDataListPerSec, RDataListPerSec);
+                        writeData2(LDataListPerSec, RDataListPerSec);
 
                         synchronized (LDataListPerSec) {
                             LDataListPerSec.clear();
