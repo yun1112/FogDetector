@@ -195,12 +195,12 @@ public class Visualization extends BlunoLibrary {
     private Timer timer = new Timer();
     private DatabaseReference usersRef;
 
-    private List<Double[]> LDataListPerSec = Collections.synchronizedList(new ArrayList<>());
-    private List<Double[]> RDataListPerSec = Collections.synchronizedList(new ArrayList<>());
-
+    private List<List<Double>> LDataListPerSec = Collections.synchronizedList(new ArrayList<>());
+    private List<List<Double>> RDataListPerSec = Collections.synchronizedList(new ArrayList<>());
     Timer gaitTimer = new Timer();
-
     private TimerTask task;
+    private Boolean hasReceivedLData = false;
+    private Boolean hasReceivedRData = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -298,28 +298,28 @@ public class Visualization extends BlunoLibrary {
         }
 
         connectLeftBtn.setOnClickListener(new Button.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Log.d(String.valueOf(isCheckedL), "isChecked: ");
+            @Override
+            public void onClick(View v) {
+                Log.d(String.valueOf(isCheckedL), "isChecked: ");
 
 
-                    if (!isCheckedL) {
-                        showBTDList(getBluetoothAdapterL());
+                if (!isCheckedL) {
+                    showBTDList(getBluetoothAdapterL());
 //                        Log.d(getMAC(), "connectLeftBtn mac: ");
 //                        connectDevice(mac);
-                    } else {
-                        if (is_L_insole_connected)
-                            if (is_L_insole_started)
-                                left_insole_device_interface.stopInsole();
+                } else {
+                    if (is_L_insole_connected)
+                        if (is_L_insole_started)
+                            left_insole_device_interface.stopInsole();
 //                        startLeftBtn.setText("Start Left");
-                        is_L_insole_started = false;
-                        bluetoothManager.closeDevice(left_insole_device_interface);
-                        is_L_insole_connected = false;
-                        Toast.makeText(Visualization.this, "Left Insole Disconnected.", Toast.LENGTH_SHORT).show();
-
-                    }
+                    is_L_insole_started = false;
+                    bluetoothManager.closeDevice(left_insole_device_interface);
+                    is_L_insole_connected = false;
+                    Toast.makeText(Visualization.this, "Left Insole Disconnected.", Toast.LENGTH_SHORT).show();
 
                 }
+
+            }
             public void showBTDList(BluetoothAdapter mBluetoothAdapter) {
                 if (ActivityCompat.checkSelfPermission(Visualization.this, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
                     // TODO: Consider calling
@@ -430,10 +430,14 @@ public class Visualization extends BlunoLibrary {
                     startBtn.setBackgroundResource(R.drawable.rounded_corner);
                     startBtn.setEnabled(true);
                 }
+
+                connectLeftBtn.setBackgroundResource(R.drawable.rounded_corner_gray);
+                connectLeftBtn.setEnabled(true);
+                connectLeftBtn.setText("DISCONNECT LEFT");
             }
 
             private void onMessageReceived(String message) {
-
+                hasReceivedLData = true;
 //                System.out.println("데이터받음");
                 //store incoming bytes temporarily
                 if (!is_L_insole_started) {
@@ -464,7 +468,9 @@ public class Visualization extends BlunoLibrary {
 //                            writeData(l_data_double_arr, r_data_double_arr);
 
                                 synchronized (LDataListPerSec) {
-                                    LDataListPerSec.add(l_data_double_arr);
+                                    LDataListPerSec.add(Arrays.asList(l_data_double_arr));
+                                    if(!hasReceivedRData)
+                                        r_data_double_arr[r_data_double_arr.length-1] = 0.0;
                                 }
 //                                LDataListPerSec.add(l_data_double_arr);
 //                                System.out.println("L데이터: "+LDataListPerSec.toString());
@@ -587,7 +593,7 @@ public class Visualization extends BlunoLibrary {
                 // Handle the error
                 Log.d(String.valueOf(error), "onError: ");
             }
-            });
+        });
 
         connectRightBtn.setOnClickListener(new Button.OnClickListener() {
             @Override
@@ -722,6 +728,9 @@ public class Visualization extends BlunoLibrary {
                     startBtn.setBackgroundResource(R.drawable.rounded_corner);
                     startBtn.setEnabled(true);
                 }
+                connectRightBtn.setBackgroundResource(R.drawable.rounded_corner_gray);
+                connectRightBtn.setEnabled(true);
+                connectRightBtn.setText("DISCONNECT RIGHT");
             }
 
             private void onMessageSent(String message) {
@@ -729,6 +738,7 @@ public class Visualization extends BlunoLibrary {
             }
 
             private void onMessageReceived(String message) {
+                hasReceivedRData = true;
                 //store incoming bytes temporarily
                 if (!is_R_insole_started) {
                     right_temp_bytes += message + " ";
@@ -753,7 +763,9 @@ public class Visualization extends BlunoLibrary {
 //                            writeData(l_data_double_arr, r_data_double_arr);
 
                                     synchronized (LDataListPerSec) {
-                                        RDataListPerSec.add(r_data_double_arr);
+                                        RDataListPerSec.add(Arrays.asList(r_data_double_arr));
+                                        if(!hasReceivedLData)
+                                            l_data_double_arr[l_data_double_arr.length-1] = 0.0;
                                     }
 //                                    System.out.println("R데이터: "+RDataListPerSec.toString());
 //
@@ -1836,7 +1848,7 @@ public class Visualization extends BlunoLibrary {
                         System.out.println("l_data_double_arr: "+Arrays.toString(l_data_double_arr));
                         System.out.println("r_data_double_arr: "+Arrays.toString(r_data_double_arr));
 
-//                        writeData2(LDataListPerSec, RDataListPerSec);
+                        writeData2(LDataListPerSec, RDataListPerSec);
 
                         synchronized (LDataListPerSec) {
                             LDataListPerSec.clear();
@@ -1851,80 +1863,79 @@ public class Visualization extends BlunoLibrary {
                         left_insole_device_interface.stopInsole();
                         is_L_insole_started = false;
 //                        startBtn.setText("Start");
-                        left_timer.cancel();
+//                        left_timer.cancel();
 //                        startBtn.setBackgroundResource(R.drawable.rounded_corner);
                         startBtn.setEnabled(true);
-
-
+                        task.cancel();
                     } else {
                         left_insole_device_interface.startInsole();
                         is_L_insole_started = true;
                         startBtn.setBackgroundResource(R.drawable.rounded_corner);
                         startBtn.setEnabled(true);
 //                        left_timer = new Timer(); // At this line a new Thread will be created
-                        left_timer.scheduleAtFixedRate(new TimerTask() {
-                            @Override
-                            public void run() {
-                                //DO YOUR THINGS
-                                runOnUiThread(new Runnable() {
-
-                                    @Override
-                                    public void run() {
-//                                        Log.d(Arrays.toString(l_data_double_arr), "@@@l_data_double_arr: ");
-                                        // 여기서 1초마다 데이터 전송함
-
-//                                        writeData(l_data_double_arr, r_data_double_arr);
-//                                        String ListDataDicts = ListData.toString();
-//                                        Log.d("TAG", "onMessageReceived: " + LListDict.size());
-
-//                                        ListData.addAll(LListDict);
-//                                        ListData.addAll(RListDict);
-                                        String ListDataDicts = LListDict.toString();
-//                                        LeftData(ListDataDicts.replace("],", "];"), "Left_Insole");
+//                        left_timer.scheduleAtFixedRate(new TimerTask() {
+//                            @Override
+//                            public void run() {
+//                                //DO YOUR THINGS
+//                                runOnUiThread(new Runnable() {
 //
-//                                        Log.d(TAG, "jinkatama: " + ListDataDicts);
+//                                    @Override
+//                                    public void run() {
+////                                        Log.d(Arrays.toString(l_data_double_arr), "@@@l_data_double_arr: ");
+//                                        // 여기서 1초마다 데이터 전송함
 //
-//                                        ListData.clear();
-//                                        LListDict.clear();
-//                                        RListDict.clear();
-//                                        LList.clear();
-//                                        RList.clear();
-
-                                        int n_L=0;
-                                        int n_R=0;
-                                        for (int i = 0; i < 89; i++) {
-//                                            Log.d(Arrays.toString(l_data_double_arr), "l_data_double_arr: ");
-//                                            Log.d(Arrays.toString(r_data_double_arr), "r_data_double_arr: ");
-                                            if(l_data_double_arr[i]>r_data_double_arr[i]){
-                                                n_L=n_L+1;
-                                            }
-                                            else{
-                                                n_R=n_R+1;
-                                            }
-                                        }
-                                        if(n_L>n_R){
-                                            if (active == false){
-                                                active=true;
-                                                Log.d(TAG, "ucokbaba: " + "Pertama Nyala");
-                                                serialSendV("1");
-                                            } else {
-                                                Log.d(TAG, "ucokbaba: " + "Sudah Nyala");
-                                            }
-                                        } else if(n_L==n_R){
-                                            Log.d(TAG, "ucokbaba: " + "FOG");
-                                        }
-                                        else{
-                                            serialSendV("0");
-                                            active=false;
-                                        }
-
-
-                                    }
-
-                                });
-
-                            }
-                        }, 1000, 1000); // delay
+////                                        writeData(l_data_double_arr, r_data_double_arr);
+////                                        String ListDataDicts = ListData.toString();
+////                                        Log.d("TAG", "onMessageReceived: " + LListDict.size());
+//
+////                                        ListData.addAll(LListDict);
+////                                        ListData.addAll(RListDict);
+//                                        String ListDataDicts = LListDict.toString();
+////                                        LeftData(ListDataDicts.replace("],", "];"), "Left_Insole");
+////
+////                                        Log.d(TAG, "jinkatama: " + ListDataDicts);
+////
+////                                        ListData.clear();
+////                                        LListDict.clear();
+////                                        RListDict.clear();
+////                                        LList.clear();
+////                                        RList.clear();
+//
+//                                        int n_L=0;
+//                                        int n_R=0;
+//                                        for (int i = 0; i < 89; i++) {
+////                                            Log.d(Arrays.toString(l_data_double_arr), "l_data_double_arr: ");
+////                                            Log.d(Arrays.toString(r_data_double_arr), "r_data_double_arr: ");
+//                                            if(l_data_double_arr[i]>r_data_double_arr[i]){
+//                                                n_L=n_L+1;
+//                                            }
+//                                            else{
+//                                                n_R=n_R+1;
+//                                            }
+//                                        }
+//                                        if(n_L>n_R){
+//                                            if (active == false){
+//                                                active=true;
+//                                                Log.d(TAG, "ucokbaba: " + "Pertama Nyala");
+//                                                serialSendV("1");
+//                                            } else {
+//                                                Log.d(TAG, "ucokbaba: " + "Sudah Nyala");
+//                                            }
+//                                        } else if(n_L==n_R){
+//                                            Log.d(TAG, "ucokbaba: " + "FOG");
+//                                        }
+//                                        else{
+//                                            serialSendV("0");
+//                                            active=false;
+//                                        }
+//
+//
+//                                    }
+//
+//                                });
+//
+//                            }
+//                        }, 1000, 1000); // delay
 
 
 
@@ -1940,7 +1951,8 @@ public class Visualization extends BlunoLibrary {
                         is_R_insole_started = false;
                         startBtn.setText("Start");
                         startBtn.setBackgroundResource(R.drawable.rounded_corner);
-                        right_timer.cancel();
+//                        right_timer.cancel();
+                        task.cancel();
                     } else {
                         startBtn.setText("Stop");
                         startBtn.setBackgroundResource(R.drawable.rounded_corner_gray);
@@ -1969,16 +1981,16 @@ public class Visualization extends BlunoLibrary {
 //                Runnable timerThread = new Runnable() {
 //                    @Override
 //                    public void run() {
-                        // 측정 타이머
+                // 측정 타이머
 //                if(is_L_insole_started && is_R_insole_started) {
 
-                    // Sleep for a while to allow scheduled tasks to run (in a real application, this wouldn't be necessary)
+                // Sleep for a while to allow scheduled tasks to run (in a real application, this wouldn't be necessary)
 //                    try {
 //                        Thread.sleep(10000); // Sleep for 10 seconds
 //                    } catch (InterruptedException e) {
 //                        e.printStackTrace();
 //                    }
-                }
+            }
 //                else {
 //                    gaitTimer.cancel();
 //                }
@@ -1988,7 +2000,7 @@ public class Visualization extends BlunoLibrary {
 ////                timerThread.run();
 //
 //            }
-                // startBtn.setClickable(true);
+            // startBtn.setClickable(true);
 
 //                if (is_R_insole_connected) {
 //                    if (is_R_insole_started) {
@@ -2146,7 +2158,7 @@ public class Visualization extends BlunoLibrary {
             }
         }, 1500);
     }
-//
+    //
 //    public void connectServer() {
 ////       EditText edtServerURL = findViewById(R.id.edtServerURL);
 //        String server = "http://192.168.1.232:5000";
@@ -2276,7 +2288,7 @@ public class Visualization extends BlunoLibrary {
 
         postRequestL(postUrl, postBodyRData);
     }
-//
+    //
     void postRequestL(String postUrl, RequestBody postBody) {
 
         OkHttpClient client = new OkHttpClient();
@@ -2645,7 +2657,7 @@ public class Visualization extends BlunoLibrary {
 //        User newUser = new User("User", LList, RList);
     }
 
-    private void writeData2(List<Double[]> LArr, List<Double[]> RArr) {
+    private void writeData2(List<List<Double>> LArr, List<List<Double>> RArr) {
         Date today = new Date();
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
@@ -2661,6 +2673,5 @@ public class Visualization extends BlunoLibrary {
     }
 
 }
-
 
 
