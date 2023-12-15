@@ -314,25 +314,7 @@ public class Visualization extends BlunoLibrary {
             non_sensor_indeces.add(ns_list[i]);
         }
 
-        sampleTask = new TimerTask() {
-            @Override
-            public void run() {
-                sampleCount = 0;
 
-                List<Double> list = new ArrayList<>();
-                list.addAll(Arrays.asList(l_data_double_arr));
-                list.addAll(Arrays.asList(r_data_double_arr));
-                dataListPerSec.add(list);
-                dataListPerSecLen++;
-                System.out.println("dataListPerSec:"+dataListPerSec);
-                System.out.println("dataListPerSecLen:"+dataListPerSecLen);
-
-                sampleCount++;
-                if (sampleCount >= NUM_SAMPLES) {
-                    timer.cancel();
-                }
-            }
-        };
 
         connectLeftBtn.setOnClickListener(new Button.OnClickListener() {
             @Override
@@ -497,36 +479,15 @@ public class Visualization extends BlunoLibrary {
                                 left_sensor_data_count++;
                                 if (!non_sensor_indeces.contains(left_sensor_data_count)) {
                                     l_data_double_arr[left_data_index] = Double.parseDouble(message);
-//                            System.out.println("NON SENSOR INDEX:" + left_data_index + " "+ message);
                                     left_data_index++;
                                 }
-//                                System.out.println("l_data_double_arr: "+l_data_double_arr);
-//                            writeData(l_data_double_arr, r_data_double_arr);
-
-//                                synchronized (dataListPerSec) {
-//                                    LDataListPerSec.add(Arrays.asList(l_data_double_arr));
-
-                                    Runnable timerThread = new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            new Timer().scheduleAtFixedRate(sampleTask, 0, SAMPLE_RATE);
-
-                                            }
-                                        };
-                                    timerThread.run();
-                                // Schedule the task to run at a fixed rate
-
-
-//                                    System.out.println("dataList[0] len:"+dataList.get(0).size());
-//                                    System.out.println("dataList:"+dataList);
-
-//                                    if(!hasReceivedRData)
-//                                        r_data_double_arr[r_data_double_arr.length-1] = 0.0;
-//                                }
-//                                LDataListPerSec.add(l_data_double_arr);
-//                                System.out.println("L데이터: "+LDataListPerSec.toString());
-
-
+//                                    Runnable timerThread = new Runnable() {
+//                                        @Override
+//                                        public void run() {
+//
+//                                            }
+//                                        };
+//                                    timerThread.run();
 
                                 runOnUiThread(new Runnable() {
                                     @Override
@@ -539,13 +500,7 @@ public class Visualization extends BlunoLibrary {
                                                 heatMapLeft.addData(point);
                                                 heatMapLeft.forceRefresh();
                                             }
-                                            Date date = new Date();
-//                        leftDataDict.put(String.valueOf(formatter.format(date)),Arrays.toString(l_data_double_arr));
-//                        LList.add(Arrays.toString(l_data_double_arr).replace("]", ""));
-//                        Log.d("TAG", "onMessageReceived: " + LList.size());
-//                        if (LList.size() == 1) {
-//                            LListDict.add(LList);
-//                        }
+
                                             left_package_count++;
                                             left_data_index = 0;
                                             left_sensor_data_count = 0;
@@ -561,17 +516,6 @@ public class Visualization extends BlunoLibrary {
 
 
                     }
-
-                    // 1초마다 서버로 전송
-//                    TimerTask task = new TimerTask() {
-//                        @Override
-//                        public void run() {
-//
-//                        }
-//                    };
-//
-//                    new Timer().scheduleAtFixedRate(task, 0l, 1000);
-
 
 
 
@@ -813,82 +757,52 @@ public class Visualization extends BlunoLibrary {
                                     right_data_index++;
 //                            writeData(l_data_double_arr, r_data_double_arr);
 
-                                    synchronized (dataListPerSec) {
-
-                                        Timer timer = new Timer();
-
-                                        // Schedule the task to run at a fixed rate
-                                        timer.scheduleAtFixedRate(new TimerTask() {
-                                            int sampleCount = 0;
-
-                                            @Override
-                                            public void run() {
-
-                                                List<Double> list = new ArrayList<>();
-                                                list.addAll(Arrays.asList(l_data_double_arr));
-                                                list.addAll(Arrays.asList(r_data_double_arr));
-                                                dataListPerSec.add(list);
-                                                dataListPerSecLen++;
-                                                sampleCount++;
-                                                if (sampleCount >= NUM_SAMPLES) {
-                                                    timer.cancel();
-                                                }
-                                            }
-                                        }, 0, SAMPLE_RATE);
-
-
-
-
-//                                        System.out.println("dataList[0] len:"+dataList.get(0).size());
-//                                        System.out.println("dataList:"+dataList);
-
-//                                        if(!hasReceivedLData)
-//                                            l_data_double_arr[l_data_double_arr.length-1] = 0.0;
+                                    synchronized (LDataListPerSec) {
+                                        List<Double> list = new ArrayList<>();
+                                        list.addAll(Arrays.asList(l_data_double_arr));
+                                        list.addAll(Arrays.asList(r_data_double_arr));
+                                        dataListPerSec.add(list);
+                                        dataListPerSecLen++;
                                     }
 //                                    System.out.println("R데이터: "+RDataListPerSec.toString());
 //
                                 }
-                            }
-                        };
-                        timerThread.run();
 
 
-                    }
-
-                    LList.add(Arrays.toString(l_data_double_arr).replace("]", ""));
-                    RList.add(Arrays.toString(r_data_double_arr).replace("[", ""));
+                                LList.add(Arrays.toString(l_data_double_arr).replace("]", ""));
+                                RList.add(Arrays.toString(r_data_double_arr).replace("[", ""));
 //                    Log.d(RList.toString(), "RList: ");
 
-                    if (RList.size()== 1 && LList.size() == 1){
-                        ListData.addAll(Collections.singleton(LList.get(0)));
-                        ListData.addAll(Collections.singleton(RList.get(0)));
-                        LList.clear();
-                        RList.clear();
-                        if (ListData.size() == 100){
-                            LListDict.clear();
-                            LListDict.addAll(ListData);
-                            ListData.clear();
-                        }
-                    }
+                                if (RList.size()== 1 && LList.size() == 1){
+                                    ListData.addAll(Collections.singleton(LList.get(0)));
+                                    ListData.addAll(Collections.singleton(RList.get(0)));
+                                    LList.clear();
+                                    RList.clear();
+                                    if (ListData.size() == 100){
+                                        LListDict.clear();
+                                        LListDict.addAll(ListData);
+                                        ListData.clear();
+                                    }
+                                }
 
-                    //if the data length reach the max_data_length, release the buffer and invert the start flag
+                                //if the data length reach the max_data_length, release the buffer and invert the start flag
 
 //                    ((Activity) mainContext).runOnUiThread(new Runnable() {
 
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
 
-                            if (right_data_len >= max_data_len + 15) {
-                                heatMapRight.clearData();
-                                for (int i = 0; i < x_R.length; i++) {
-                                    HeatMap.DataPoint point = new HeatMap.DataPoint(x_R[i], y[i], r_data_double_arr[i]);
-                                    heatMapRight.addData(point);
-                                    heatMapRight.forceRefresh();
-                                }
+                                        if (right_data_len >= max_data_len + 15) {
+                                            heatMapRight.clearData();
+                                            for (int i = 0; i < x_R.length; i++) {
+                                                HeatMap.DataPoint point = new HeatMap.DataPoint(x_R[i], y[i], r_data_double_arr[i]);
+                                                heatMapRight.addData(point);
+                                                heatMapRight.forceRefresh();
+                                            }
 //                        Log.d(r_data_double_arr.toString(), "r_data_double_arr: ");
 
-                                Date date = new Date();
+                                            Date date = new Date();
 //                            rightDataDict.put(String.valueOf(formatter.format(date)), Arrays.toString(r_data_double_arr));
 //                        String list = Arrays.toString(customers.toArray()).replace("[", "").replace("]", "");
 //                        RList.add(Arrays.toString(r_data_double_arr).replace("[", ""));
@@ -896,13 +810,24 @@ public class Visualization extends BlunoLibrary {
 //                            RListDict.add(RList);
 //                        }
 //                        Log.d("TAG", "onMessageReceived: " + RList);
-                                right_data_index = 0;
-                                right_sensor_data_count = 0;
-                                right_data_len = 0;
-                                is_R_insole_started = false;
+                                            right_data_index = 0;
+                                            right_sensor_data_count = 0;
+                                            right_data_len = 0;
+                                            is_R_insole_started = false;
+                                        }
+                                    }
+                                });
+
+
                             }
-                        }
-                    });
+                        };
+                        timerThread.run();
+
+
+
+
+                    }
+
 
 
                 }
@@ -1917,22 +1842,41 @@ public class Visualization extends BlunoLibrary {
 
                 Toast.makeText(Visualization.this, "Gait measurement started.", Toast.LENGTH_SHORT).show();
 
-                task = new TimerTask() {
+
+                sampleTask = new TimerTask() {
                     @Override
                     public void run() {
-                        System.out.println("Task executed at: " + System.currentTimeMillis());
+                        sampleCount = 0;
 
-                        System.out.println("1초마다 데이터 전송");
-                        System.out.println("dataListPerSec: "+dataListPerSec);
+                        List<Double> list = new ArrayList<>();
+                        list.addAll(Arrays.asList(l_data_double_arr));
+                        list.addAll(Arrays.asList(r_data_double_arr));
+                        dataListPerSec.add(list);
+                        dataListPerSecLen++;
+                        System.out.println("dataListPerSec:"+dataListPerSec);
+                        System.out.println("dataListPerSecLen:"+dataListPerSecLen);
 
-                        writeData2();
-                        synchronized (dataListPerSec) {
-                            dataListPerSec.clear();
+                        sampleCount++;
+//                        if (sampleCount >= NUM_SAMPLES) {
+//                            timer.cancel();
+//                        }
+
+                        if(sampleCount%NUM_SAMPLES == 0) {
+                            System.out.println("1초마다 데이터 전송");
+                            System.out.println("dataListPerSec: "+dataListPerSec);
+                            System.out.println("sampleCount: "+sampleCount);
+
+//                        writeData2();
+                            synchronized (dataListPerSec) {
+                                dataListPerSec.clear();
+                            }
                         }
 
                     }
                 };
-                new Timer().scheduleAtFixedRate(task, 1000, 1000);
+                new Timer().scheduleAtFixedRate(sampleTask, 0, 1000);
+
+//                new Timer().scheduleAtFixedRate(sampleTask, 0, SAMPLE_RATE);
 
                 if (is_L_insole_connected) {
                     if (is_L_insole_started) {
