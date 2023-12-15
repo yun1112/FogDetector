@@ -80,6 +80,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.stream.Stream;
 
 public class Visualization extends BlunoLibrary {
 
@@ -117,6 +118,7 @@ public class Visualization extends BlunoLibrary {
     private Double r_data_double_arr[] = new Double[89];
 
     private Double l_data_double_arr[] = new Double[89];
+    private Double data_double_arr[] = new Double[178];
 
     private List<Integer> non_sensor_indeces = new ArrayList<Integer>(ns_list.length + 1);
     private SimpleBluetoothDeviceInterface left_insole_device_interface;
@@ -197,6 +199,8 @@ public class Visualization extends BlunoLibrary {
 
     private List<List<Double>> LDataListPerSec = Collections.synchronizedList(new ArrayList<>());
     private List<List<Double>> RDataListPerSec = Collections.synchronizedList(new ArrayList<>());
+//    private List<List<Double>> dataList = Collections.synchronizedList(new ArrayList<>());
+    private List<List<Double>> dataListPerSec = Collections.synchronizedList(new ArrayList<>());
     Timer gaitTimer = new Timer();
     private TimerTask task;
     private Boolean hasReceivedLData = false;
@@ -248,7 +252,13 @@ public class Visualization extends BlunoLibrary {
         mDatabase = FirebaseDatabase.getInstance().getReference();
         String androidId = Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
 
-        usersRef = mDatabase.child(androidId+"_"+USER_NAME); // user name
+        Date today = new Date();
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
+
+        String currentDate = dateFormat.format(today);
+
+        usersRef = mDatabase.child(currentDate+"_"+USER_NAME); // user name
 
         if (bluetoothManager == null) {
             // Bluetooth unavailable on this device :( tell the user
@@ -402,8 +412,7 @@ public class Visualization extends BlunoLibrary {
             }
 
 
-            public void connectDevice(String mac) {
-                bluetoothManager.openSerialDevice(mac)
+            public void connectDevice(String mac) {                bluetoothManager.openSerialDevice(mac)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(this::onConnected, this::onError);
@@ -467,10 +476,17 @@ public class Visualization extends BlunoLibrary {
 //                                System.out.println("l_data_double_arr: "+l_data_double_arr);
 //                            writeData(l_data_double_arr, r_data_double_arr);
 
-                                synchronized (LDataListPerSec) {
-                                    LDataListPerSec.add(Arrays.asList(l_data_double_arr));
-                                    if(!hasReceivedRData)
-                                        r_data_double_arr[r_data_double_arr.length-1] = 0.0;
+                                synchronized (dataListPerSec) {
+//                                    LDataListPerSec.add(Arrays.asList(l_data_double_arr));
+                                    List<Double> list = new ArrayList<>();
+                                    list.addAll(Arrays.asList(l_data_double_arr));
+                                    list.addAll(Arrays.asList(r_data_double_arr));
+                                    dataListPerSec.add(list);
+//                                    System.out.println("dataList[0] len:"+dataList.get(0).size());
+//                                    System.out.println("dataList:"+dataList);
+
+//                                    if(!hasReceivedRData)
+//                                        r_data_double_arr[r_data_double_arr.length-1] = 0.0;
                                 }
 //                                LDataListPerSec.add(l_data_double_arr);
 //                                System.out.println("L데이터: "+LDataListPerSec.toString());
@@ -762,10 +778,17 @@ public class Visualization extends BlunoLibrary {
                                     right_data_index++;
 //                            writeData(l_data_double_arr, r_data_double_arr);
 
-                                    synchronized (LDataListPerSec) {
-                                        RDataListPerSec.add(Arrays.asList(r_data_double_arr));
-                                        if(!hasReceivedLData)
-                                            l_data_double_arr[l_data_double_arr.length-1] = 0.0;
+                                    synchronized (dataListPerSec) {
+                                        List<Double> list = new ArrayList<>();
+                                        list.addAll(Arrays.asList(l_data_double_arr));
+                                        list.addAll(Arrays.asList(r_data_double_arr));
+                                        dataListPerSec.add(list);
+
+//                                        System.out.println("dataList[0] len:"+dataList.get(0).size());
+//                                        System.out.println("dataList:"+dataList);
+
+//                                        if(!hasReceivedLData)
+//                                            l_data_double_arr[l_data_double_arr.length-1] = 0.0;
                                     }
 //                                    System.out.println("R데이터: "+RDataListPerSec.toString());
 //
@@ -1847,13 +1870,26 @@ public class Visualization extends BlunoLibrary {
                         System.out.println("1초마다 데이터 전송");
                         System.out.println("l_data_double_arr: "+Arrays.toString(l_data_double_arr));
                         System.out.println("r_data_double_arr: "+Arrays.toString(r_data_double_arr));
+//                        if(!dataList.isEmpty()){
+//                            System.out.println("dataList[0] len: "+dataList.get(0).size());
+//                            System.out.println("dataList: "+dataList.size());
+//                        }
+//
 
-                        writeData2(LDataListPerSec, RDataListPerSec);
-
-                        synchronized (LDataListPerSec) {
-                            LDataListPerSec.clear();
-                            RDataListPerSec.clear();
+                        System.out.println("dataListPerSec:"+dataListPerSec);
+                        System.out.println("dataListPerSec len:"+dataListPerSec.size());
+                        if(dataListPerSec.size()>0){
+                            System.out.println("dataListPerSec[0]:"+dataListPerSec.get(0));
+                            System.out.println("dataListPerSec[0] len:"+dataListPerSec.get(0).size());
+                            writeData2();
+//
+                            synchronized (dataListPerSec) {
+//                            LDataListPerSec.clear();
+//                            RDataListPerSec.clear();
+                                dataListPerSec.clear();
+                            }
                         }
+
                     }
                 };
                 new Timer().scheduleAtFixedRate(task, 1000, 1000);
@@ -2657,21 +2693,41 @@ public class Visualization extends BlunoLibrary {
 //        User newUser = new User("User", LList, RList);
     }
 
-    private void writeData2(List<List<Double>> LArr, List<List<Double>> RArr) {
+    private void writeData2() {
         Date today = new Date();
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
 
         String currentDate = dateFormat.format(today);
 
-        usersRef.child(currentDate).child("left").setValue(LArr.toString());
-        usersRef.child(currentDate).child("right").setValue(RArr.toString());
+        System.out.println("dataList");
+
+//        usersRef.child(currentDate).child("left").setValue(LDataListPerSec.toString());
+//        usersRef.child(currentDate).child("right").setValue(RDataListPerSec.toString());
+        usersRef.child(currentDate).child("both").setValue(dataListPerSec.toString());
+
+
+
 //        usersRef.child(currentDate).child("left").child(usersRef.push().getKey()).setValue(LArr.toString());
 //        usersRef.child(currentDate).child("right").child(usersRef.push().getKey()).setValue(RArr.toString());
 
 //        User newUser = new User("User", LList, RList);
     }
+    private static double[] concatenateArrays(double[] array1, double[] array2) {
+        int length1 = array1.length;
+        int length2 = array2.length;
 
+        // Create a new array with the combined length
+        double[] result = new double[length1 + length2];
+
+        // Copy elements from array1
+        System.arraycopy(array1, 0, result, 0, length1);
+
+        // Copy elements from array2
+        System.arraycopy(array2, 0, result, length1, length2);
+
+        return result;
+    }
 }
 
 
