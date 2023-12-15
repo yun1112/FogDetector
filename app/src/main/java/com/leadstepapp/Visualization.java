@@ -206,6 +206,13 @@ public class Visualization extends BlunoLibrary {
     private Boolean hasReceivedLData = false;
     private Boolean hasReceivedRData = false;
 
+    private int dataListPerSecLen = 0;
+    private static final int SAMPLE_RATE = 20; // milliseconds
+    private static final int NUM_SAMPLES = 50;
+
+    private TimerTask sampleTask;
+    private int sampleCount = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -306,6 +313,26 @@ public class Visualization extends BlunoLibrary {
         for (int i = 0; i < ns_list.length; i++) {
             non_sensor_indeces.add(ns_list[i]);
         }
+
+        sampleTask = new TimerTask() {
+            @Override
+            public void run() {
+                sampleCount = 0;
+
+                List<Double> list = new ArrayList<>();
+                list.addAll(Arrays.asList(l_data_double_arr));
+                list.addAll(Arrays.asList(r_data_double_arr));
+                dataListPerSec.add(list);
+                dataListPerSecLen++;
+                System.out.println("dataListPerSec:"+dataListPerSec);
+                System.out.println("dataListPerSecLen:"+dataListPerSecLen);
+
+                sampleCount++;
+                if (sampleCount >= NUM_SAMPLES) {
+                    timer.cancel();
+                }
+            }
+        };
 
         connectLeftBtn.setOnClickListener(new Button.OnClickListener() {
             @Override
@@ -476,18 +503,26 @@ public class Visualization extends BlunoLibrary {
 //                                System.out.println("l_data_double_arr: "+l_data_double_arr);
 //                            writeData(l_data_double_arr, r_data_double_arr);
 
-                                synchronized (dataListPerSec) {
+//                                synchronized (dataListPerSec) {
 //                                    LDataListPerSec.add(Arrays.asList(l_data_double_arr));
-                                    List<Double> list = new ArrayList<>();
-                                    list.addAll(Arrays.asList(l_data_double_arr));
-                                    list.addAll(Arrays.asList(r_data_double_arr));
-                                    dataListPerSec.add(list);
+
+                                    Runnable timerThread = new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            new Timer().scheduleAtFixedRate(sampleTask, 0, SAMPLE_RATE);
+
+                                            }
+                                        };
+                                    timerThread.run();
+                                // Schedule the task to run at a fixed rate
+
+
 //                                    System.out.println("dataList[0] len:"+dataList.get(0).size());
 //                                    System.out.println("dataList:"+dataList);
 
 //                                    if(!hasReceivedRData)
 //                                        r_data_double_arr[r_data_double_arr.length-1] = 0.0;
-                                }
+//                                }
 //                                LDataListPerSec.add(l_data_double_arr);
 //                                System.out.println("L데이터: "+LDataListPerSec.toString());
 
@@ -779,10 +814,30 @@ public class Visualization extends BlunoLibrary {
 //                            writeData(l_data_double_arr, r_data_double_arr);
 
                                     synchronized (dataListPerSec) {
-                                        List<Double> list = new ArrayList<>();
-                                        list.addAll(Arrays.asList(l_data_double_arr));
-                                        list.addAll(Arrays.asList(r_data_double_arr));
-                                        dataListPerSec.add(list);
+
+                                        Timer timer = new Timer();
+
+                                        // Schedule the task to run at a fixed rate
+                                        timer.scheduleAtFixedRate(new TimerTask() {
+                                            int sampleCount = 0;
+
+                                            @Override
+                                            public void run() {
+
+                                                List<Double> list = new ArrayList<>();
+                                                list.addAll(Arrays.asList(l_data_double_arr));
+                                                list.addAll(Arrays.asList(r_data_double_arr));
+                                                dataListPerSec.add(list);
+                                                dataListPerSecLen++;
+                                                sampleCount++;
+                                                if (sampleCount >= NUM_SAMPLES) {
+                                                    timer.cancel();
+                                                }
+                                            }
+                                        }, 0, SAMPLE_RATE);
+
+
+
 
 //                                        System.out.println("dataList[0] len:"+dataList.get(0).size());
 //                                        System.out.println("dataList:"+dataList);
@@ -1868,26 +1923,11 @@ public class Visualization extends BlunoLibrary {
                         System.out.println("Task executed at: " + System.currentTimeMillis());
 
                         System.out.println("1초마다 데이터 전송");
-                        System.out.println("l_data_double_arr: "+Arrays.toString(l_data_double_arr));
-                        System.out.println("r_data_double_arr: "+Arrays.toString(r_data_double_arr));
-//                        if(!dataList.isEmpty()){
-//                            System.out.println("dataList[0] len: "+dataList.get(0).size());
-//                            System.out.println("dataList: "+dataList.size());
-//                        }
-//
+                        System.out.println("dataListPerSec: "+dataListPerSec);
 
-                        System.out.println("dataListPerSec:"+dataListPerSec);
-                        System.out.println("dataListPerSec len:"+dataListPerSec.size());
-                        if(dataListPerSec.size()>0){
-                            System.out.println("dataListPerSec[0]:"+dataListPerSec.get(0));
-                            System.out.println("dataListPerSec[0] len:"+dataListPerSec.get(0).size());
-                            writeData2();
-//
-                            synchronized (dataListPerSec) {
-//                            LDataListPerSec.clear();
-//                            RDataListPerSec.clear();
-                                dataListPerSec.clear();
-                            }
+                        writeData2();
+                        synchronized (dataListPerSec) {
+                            dataListPerSec.clear();
                         }
 
                     }
@@ -2700,8 +2740,11 @@ public class Visualization extends BlunoLibrary {
 
         String currentDate = dateFormat.format(today);
 
-        System.out.println("dataList");
-
+        if(dataListPerSecLen==0) return;
+        System.out.println("dataListPerSec:"+dataListPerSec);
+        System.out.println("dataListPerSec[0]:"+dataListPerSec.get(0));
+        System.out.println("dataListPerSec[0]:"+dataListPerSec.size());
+        System.out.println("dataListPerSec[0] len:"+dataListPerSec.get(0).size());
 //        usersRef.child(currentDate).child("left").setValue(LDataListPerSec.toString());
 //        usersRef.child(currentDate).child("right").setValue(RDataListPerSec.toString());
         usersRef.child(currentDate).child("both").setValue(dataListPerSec.toString());
