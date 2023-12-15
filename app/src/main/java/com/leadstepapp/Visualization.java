@@ -212,6 +212,7 @@ public class Visualization extends BlunoLibrary {
 
     private TimerTask sampleTask;
     private int sampleCount = 0;
+    private Boolean isStarted = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -455,6 +456,7 @@ public class Visualization extends BlunoLibrary {
             }
 
             private void onMessageReceived(String message) {
+                isStarted = true;
                 hasReceivedLData = true;
 //                System.out.println("데이터받음");
                 //store incoming bytes temporarily
@@ -733,6 +735,7 @@ public class Visualization extends BlunoLibrary {
             }
 
             private void onMessageReceived(String message) {
+                isStarted = true;
                 hasReceivedRData = true;
                 //store incoming bytes temporarily
                 if (!is_R_insole_started) {
@@ -757,42 +760,30 @@ public class Visualization extends BlunoLibrary {
                                     right_data_index++;
 //                            writeData(l_data_double_arr, r_data_double_arr);
 
-                                    synchronized (LDataListPerSec) {
-                                        List<Double> list = new ArrayList<>();
-                                        list.addAll(Arrays.asList(l_data_double_arr));
-                                        list.addAll(Arrays.asList(r_data_double_arr));
-                                        dataListPerSec.add(list);
-                                        dataListPerSecLen++;
+                                    LList.add(Arrays.toString(l_data_double_arr).replace("]", ""));
+                                    RList.add(Arrays.toString(r_data_double_arr).replace("[", ""));
+//                    Log.d(RList.toString(), "RList: ");
+
+                                    if (RList.size()== 1 && LList.size() == 1){
+                                        ListData.addAll(Collections.singleton(LList.get(0)));
+                                        ListData.addAll(Collections.singleton(RList.get(0)));
+                                        LList.clear();
+                                        RList.clear();
+                                        if (ListData.size() == 100){
+                                            LListDict.clear();
+                                            LListDict.addAll(ListData);
+                                            ListData.clear();
+                                        }
                                     }
 //                                    System.out.println("R데이터: "+RDataListPerSec.toString());
 //
                                 }
 
 
-                                LList.add(Arrays.toString(l_data_double_arr).replace("]", ""));
-                                RList.add(Arrays.toString(r_data_double_arr).replace("[", ""));
-//                    Log.d(RList.toString(), "RList: ");
-
-                                if (RList.size()== 1 && LList.size() == 1){
-                                    ListData.addAll(Collections.singleton(LList.get(0)));
-                                    ListData.addAll(Collections.singleton(RList.get(0)));
-                                    LList.clear();
-                                    RList.clear();
-                                    if (ListData.size() == 100){
-                                        LListDict.clear();
-                                        LListDict.addAll(ListData);
-                                        ListData.clear();
-                                    }
-                                }
-
-                                //if the data length reach the max_data_length, release the buffer and invert the start flag
-
-//                    ((Activity) mainContext).runOnUiThread(new Runnable() {
 
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-
                                         if (right_data_len >= max_data_len + 15) {
                                             heatMapRight.clearData();
                                             for (int i = 0; i < x_R.length; i++) {
@@ -815,19 +806,16 @@ public class Visualization extends BlunoLibrary {
                                             right_data_len = 0;
                                             is_R_insole_started = false;
                                         }
+
                                     }
                                 });
-
 
                             }
                         };
                         timerThread.run();
 
 
-
-
                     }
-
 
 
                 }
@@ -1846,35 +1834,41 @@ public class Visualization extends BlunoLibrary {
                 sampleTask = new TimerTask() {
                     @Override
                     public void run() {
-                        sampleCount = 0;
+                        if(isStarted) {
+                            List<Double> list = new ArrayList<>();
+                            list.addAll(Arrays.asList(l_data_double_arr));
+                            list.addAll(Arrays.asList(r_data_double_arr));
+                            dataListPerSec.add(list);
+                            dataListPerSecLen++;
+                            System.out.println("list:"+list);
+                            System.out.println("dataListPerSec:"+dataListPerSec);
+                            System.out.println("dataListPerSecLen:"+dataListPerSecLen);
 
-                        List<Double> list = new ArrayList<>();
-                        list.addAll(Arrays.asList(l_data_double_arr));
-                        list.addAll(Arrays.asList(r_data_double_arr));
-                        dataListPerSec.add(list);
-                        dataListPerSecLen++;
-                        System.out.println("dataListPerSec:"+dataListPerSec);
-                        System.out.println("dataListPerSecLen:"+dataListPerSecLen);
+//                            sampleCount++;
 
-                        sampleCount++;
+                            if(sampleCount%NUM_SAMPLES == 0) {
+                                System.out.println("1초마다 데이터 전송");
+                                System.out.println("dataListPerSec: "+dataListPerSec);
+                                System.out.println("sampleCount: "+sampleCount);
+
+                                writeData2();
+                                synchronized (dataListPerSec) {
+                                    dataListPerSec.clear();
+                                    dataListPerSecLen=0;
+                                    sampleCount=0;
+                                }
+                            }
+                        }
+
+
 //                        if (sampleCount >= NUM_SAMPLES) {
 //                            timer.cancel();
 //                        }
 
-                        if(sampleCount%NUM_SAMPLES == 0) {
-                            System.out.println("1초마다 데이터 전송");
-                            System.out.println("dataListPerSec: "+dataListPerSec);
-                            System.out.println("sampleCount: "+sampleCount);
-
-//                        writeData2();
-                            synchronized (dataListPerSec) {
-                                dataListPerSec.clear();
-                            }
-                        }
 
                     }
                 };
-                new Timer().scheduleAtFixedRate(sampleTask, 0, 1000);
+                new Timer().scheduleAtFixedRate(sampleTask, 0, SAMPLE_RATE);
 
 //                new Timer().scheduleAtFixedRate(sampleTask, 0, SAMPLE_RATE);
 
