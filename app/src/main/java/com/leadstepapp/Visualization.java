@@ -1844,9 +1844,9 @@ public class Visualization extends BlunoLibrary {
                             System.out.println("dataListPerSec:"+dataListPerSec);
                             System.out.println("dataListPerSecLen:"+dataListPerSecLen);
 
-//                            sampleCount++;
+                            System.out.println("sampleCount:"+sampleCount);
 
-                            if(sampleCount%NUM_SAMPLES == 0) {
+                            if(sampleCount > 0 && sampleCount%NUM_SAMPLES == 0) {
                                 System.out.println("1초마다 데이터 전송");
                                 System.out.println("dataListPerSec: "+dataListPerSec);
                                 System.out.println("sampleCount: "+sampleCount);
@@ -1858,6 +1858,7 @@ public class Visualization extends BlunoLibrary {
                                     sampleCount=0;
                                 }
                             }
+                            sampleCount++;
                         }
 
 
@@ -1868,7 +1869,7 @@ public class Visualization extends BlunoLibrary {
 
                     }
                 };
-                new Timer().scheduleAtFixedRate(sampleTask, 0, SAMPLE_RATE);
+                new Timer().scheduleAtFixedRate(sampleTask, 1000, SAMPLE_RATE);
 
 //                new Timer().scheduleAtFixedRate(sampleTask, 0, SAMPLE_RATE);
 
