@@ -1835,24 +1835,19 @@ public class Visualization extends BlunoLibrary {
                     @Override
                     public void run() {
                         if(isStarted) {
-                            // 1~50:50
-                            // 51~100:50
-                            if(sampleCount > 0 && sampleCount%NUM_SAMPLES == 0) {
-                                List<Double> list = new ArrayList<>();
-                                list.addAll(Arrays.asList(l_data_double_arr));
-                                list.addAll(Arrays.asList(r_data_double_arr));
-                                dataListPerSec.add(list);
-                                dataListPerSecLen++;
-                                System.out.println("list:"+list);
-                                System.out.println("dataListPerSec:"+dataListPerSec);
-                                System.out.println("dataListPerSecLen:"+dataListPerSecLen);
+                            List<Double> list = new ArrayList<>();
+                            list.addAll(Arrays.asList(l_data_double_arr));
+                            list.addAll(Arrays.asList(r_data_double_arr));
+                            dataListPerSec.add(list);
+                            dataListPerSecLen++;
+                            System.out.println("list:"+list);
+                            System.out.println("dataListPerSec:"+dataListPerSec);
+                            System.out.println("dataListPerSecLen:"+dataListPerSecLen);
 
-                                System.out.println("sampleCount:"+sampleCount);
-
-                                System.out.println("1초마다 데이터 전송");
-                                System.out.println("dataListPerSec: "+dataListPerSec);
-                                System.out.println("sampleCount: "+sampleCount);
-
+                            System.out.println("sampleCount:"+sampleCount);
+                            sampleCount++;
+                            if(sampleCount%NUM_SAMPLES == 0) {
+                                System.out.println("1초마다 데이터 전송: " + sampleCount);
                                 writeData2();
                                 synchronized (dataListPerSec) {
                                     dataListPerSec.clear();
@@ -1860,7 +1855,6 @@ public class Visualization extends BlunoLibrary {
                                     sampleCount=0;
                                 }
                             }
-                            sampleCount++;
                         }
 
 
